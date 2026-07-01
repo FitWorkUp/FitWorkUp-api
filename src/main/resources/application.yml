@@ -1,0 +1,77 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: fitworkup-api
+
+  # 📧 CONFIGURAÇÃO DE E-MAIL (Redefinição de Senha)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: redefinirsenhasystem6@gmail.com
+    password: fcvh fwwg bdcd uzms
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+  # 🌐 CONFIGURAÇÃO DO GOOGLE SIGN-IN (OAuth2)
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:SEU_CLIENT_ID_AQUI.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET:SUA_CLIENT_SECRET_AQUI}
+            scope:
+              - profile
+              - email
+
+  # Definição de qual perfil rodará por padrão (Mude para 'prod' quando for publicar)
+  profiles:
+    active: prod
+
+---
+# 🛠️ PERFIL DE DESENVOLVIMENTO E TESTES (H2 Database)
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:h2:mem:fitworkupdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+---
+# 🚀 PERFIL DE PRODUÇÃO (PostgreSQL)
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fitworkup}
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update 
+    show-sql: true
