@@ -1,13 +1,12 @@
-package com.fitworkup.repositories;
+package com.fitworkup.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.fitworkup.models.UserAchievement;
 
 import java.util.List;
 
-@Repository
+
 public interface UserAchievementRepository extends JpaRepository<UserAchievement, Long> {
     
     // Busca todas as conquistas que um usuário específico já desbloqueou

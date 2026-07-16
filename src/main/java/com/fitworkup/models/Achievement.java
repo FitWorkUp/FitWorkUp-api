@@ -17,17 +17,17 @@ public class Achievement {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
-    private String name; // Ex: "Monstro dos Passos", "Madrugador"
+    private String name; 
 
     @Column(nullable = false)
-    private String description; // Ex: "Complete um treino com mais de 10.000 passos"
+    private String description; 
 
     @Column(name = "xp_reward", nullable = false)
-    private Integer xpReward; // Quanto de XP o usuário ganha (ex: 150)
+    private Integer xpReward; 
 
     @Column(name = "fit_coins_reward", nullable = false)
-    private Integer fitCoinsReward; // Quantas FitCoins ele ganha (ex: 30)
+    private Integer fitCoinsReward; 
 
     @Column(name = "icon_name", length = 50)
-    private String iconName; // Nome do ícone para o Jetpack Compose carregar (ex: "ic_fire", "ic_trophy")
+    private String iconName; 
 }

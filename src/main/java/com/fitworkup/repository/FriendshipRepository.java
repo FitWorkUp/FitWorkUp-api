@@ -1,14 +1,12 @@
-package com.fitworkup.repositories;
+package com.fitworkup.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.fitworkup.models.Friendship;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     
     // Busca todas as amizades aceitas ou pendentes de um usuário específico

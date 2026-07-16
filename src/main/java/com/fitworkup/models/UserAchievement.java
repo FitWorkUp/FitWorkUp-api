@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_user_achievements", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "achievement_id"}) // Impede o usuário de ganhar a mesma conquista duas vezes
+    @UniqueConstraint(columnNames = {"user_id", "achievement_id"}) 
 })
 @Data
 @NoArgsConstructor
@@ -28,5 +28,5 @@ public class UserAchievement {
     private Achievement achievement;
 
     @Column(name = "unlocked_at", nullable = false)
-    private LocalDateTime unlockedAt = LocalDateTime.now(); // Data do desbloqueio
+    private LocalDateTime unlockedAt = LocalDateTime.now(); 
 }

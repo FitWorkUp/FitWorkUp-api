@@ -1,4 +1,4 @@
-package com.fitworkup.exceptions;
+package com.fitworkup.security.exceptions;
 
 public class BusinessRuleException extends RuntimeException {
     
