@@ -1,4 +1,4 @@
-package com.fitworkup.dtos.response;
+package com.fitworkup.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileDTO {
+public class RankingItemDTO {
     private String username;
-    private String email;
-    private Integer xp;
     private Integer level;
-    private Integer fitCoins;
+    private Integer xp;
 }

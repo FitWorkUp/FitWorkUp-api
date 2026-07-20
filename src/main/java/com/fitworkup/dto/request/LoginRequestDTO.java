@@ -1,4 +1,4 @@
-package com.fitworkup.dtos.request;
+package com.fitworkup.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

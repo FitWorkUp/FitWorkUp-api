@@ -1,4 +1,4 @@
-package com.fitworkup.services;
+package com.fitworkup.service;
 
 public class WorkoutService {
     
