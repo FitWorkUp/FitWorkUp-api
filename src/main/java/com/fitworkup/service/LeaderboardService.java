@@ -1,4 +1,4 @@
-package com.fitworkup.acelerometro;
+package com.fitworkup.service;
 
 public class LeaderboardService {
     

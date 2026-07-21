@@ -1,11 +1,17 @@
 package com.fitworkup.models;
 
-import lombok.Data;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
 @Table(name = "store_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StoreItem {
 
     @Id
@@ -15,12 +21,10 @@ public class StoreItem {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 255)
-    private String description;
-
     @Column(nullable = false)
-    private Integer price;
+    private Integer price; // Custo em moedas (Coins) do FitWorkUp
 
-    @Column(nullable = false, length = 50) // COSMETIC ou CONSUMABLE
-    private String type;
+    // Adicionando o campo que o repositório estava cobrando
+    @Column(nullable = false, length = 50)
+    private String category; // EX: "COSMETIC", "AVATAR_FRAME", "XP_BOOST"
 }

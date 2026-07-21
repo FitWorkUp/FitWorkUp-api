@@ -13,7 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    Optional<User> findByGoogleId(String googleId);
 
     // SEGURANÇA & ARQUITETURA: Ranking dinâmico calculado por XP. 
     // Elimina a necessidade de tabelas temporárias ou de controle para o Placar de Líderes.

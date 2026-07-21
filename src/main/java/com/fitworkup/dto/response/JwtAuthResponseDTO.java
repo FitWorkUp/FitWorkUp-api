@@ -1,4 +1,4 @@
-package com.fitworkup.dtos.response;
+package com.fitworkup.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

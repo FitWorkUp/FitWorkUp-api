@@ -2,6 +2,7 @@ package com.fitworkup.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -17,12 +18,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// Imports necessários para a segurança do Spring
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails { // CORREÇÃO AQUI: Assinando o contrato de segurança
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -60,8 +67,48 @@ public class User {
     @Column(nullable = false, length = 50, name = "prestige_title")
     private String prestigeTitle = "NOVATO";
 
-    // ADICIONE ESTE BLOCO AQUI NO FINAL DA SUA CLASSE:
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserAchievement> userAchievements = new ArrayList<>();
+
+    // ==========================================
+    // IMPLEMENTAÇÃO DOS MÉTODOS USERDETAILS
+    // ==========================================
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Define o nível de acesso do usuário dentro do ecossistema FitWorkUp
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        // O Spring Security usa o e-mail como identificador único de login no nosso ecossistema
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override 
+    public boolean isAccountNonExpired() { 
+        return true; 
+    }
+
+    @Override 
+    public boolean isAccountNonLocked() { 
+        return true; 
+    }
+
+    @Override 
+    public boolean isCredentialsNonExpired() { 
+        return true; 
+    }
+
+    @Override 
+    public boolean isEnabled() { 
+        return true; 
+    }
 }

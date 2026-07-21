@@ -5,12 +5,18 @@ spring:
   application:
     name: fitworkup-api
 
+app:
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    expiration-in-ms: ${JWT_EXPIRATION_MS:86400000}
+  
   # 📧 CONFIGURAÇÃO DE E-MAIL (Redefinição de Senha)
   mail:
     host: smtp.gmail.com
     port: 587
-    username: redefinirsenhasystem6@gmail.com
-    password: fcvh fwwg bdcd uzms
+    username: ${MAIL_USERNAME:redefinirsenhasystem6@gmail.com}
+    password: ${MAIL_PASSWORD:fcvh fwwg bdcd uzms}
     properties:
       mail:
         smtp:
@@ -31,47 +37,6 @@ spring:
               - profile
               - email
 
-  # Definição de qual perfil rodará por padrão (Mude para 'prod' quando for publicar)
+  # Definição de qual perfil rodará por padrão
   profiles:
-    active: prod
-
----
-# 🛠️ PERFIL DE DESENVOLVIMENTO E TESTES (H2 Database)
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: jdbc:h2:mem:fitworkupdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
----
-# 🚀 PERFIL DE PRODUÇÃO (PostgreSQL)
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fitworkup}
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update 
-    show-sql: true
+    active: dev
