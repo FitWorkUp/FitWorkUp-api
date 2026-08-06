@@ -6,7 +6,7 @@ import com.fitworkup.dto.response.JwtAuthResponseDTO;
 import com.fitworkup.dto.response.UserProfileDTO;
 import com.fitworkup.models.User;
 import com.fitworkup.repository.UserRepository;
-import com.fitworkup.security.JwtTokenProvider;
+import com.fitworkup.security.Jwt.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

@@ -1,4 +1,4 @@
-package com.fitworkup.security;
+package com.fitworkup.security.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

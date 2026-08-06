@@ -1,4 +1,4 @@
-package com.fitworkup.security;
+package com.fitworkup.security.Jwt;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
