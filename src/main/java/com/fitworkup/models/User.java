@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,7 +48,6 @@ public class User implements UserDetails {
     @Column(name = "google_id", unique = true, length = 255)
     private String googleId;
 
-    // 💡 Campo essencial para o cálculo real de calorias (Cálculo Metabólico)
     @Column(name = "weight_kg")
     private Double weightKg;
     
@@ -78,13 +78,41 @@ public class User implements UserDetails {
     @Builder.Default
     private String prestigeTitle = "NOVATO";
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<UserAchievement> userAchievements = new ArrayList<>();
 
+    @PrePersist
+    public void prePersist() {
+        if (this.xp == null) this.xp = 0;
+        if (this.level == null) this.level = 1;
+        if (this.fitcoins == null) this.fitcoins = 0;
+        if (this.streak == null) this.streak = 0;
+        if (this.avatarBorder == null) this.avatarBorder = "DEFAULT";
+        if (this.prestigeTitle == null) this.prestigeTitle = "NOVATO";
+        if (this.active == null) this.active = true;
+    }
+
+    // Métodos acessores explícitos
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getActive() {
+        return this.active;
+    }
+
     // ==========================================
-    // IMPLEMENTAÇÃO DOS MÉTODOS USERDETAILS
+    // IMPLEMENTAÇÃO USERDETAILS
     // ==========================================
 
     @Override
@@ -119,6 +147,6 @@ public class User implements UserDetails {
 
     @Override 
     public boolean isEnabled() { 
-        return true; 
+        return Boolean.TRUE.equals(this.active); 
     }
 }

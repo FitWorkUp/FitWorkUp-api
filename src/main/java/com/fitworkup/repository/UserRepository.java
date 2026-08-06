@@ -16,13 +16,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    @Query("SELECT u FROM User u WHERE u.email = :login OR u.username = :login")
-    Optional<User> findByEmailOrUsername(@Param("login") String login);
+    @Query("SELECT u FROM User u WHERE u.email = :identifier OR u.username = :identifier")
+    Optional<User> findByEmailOrUsername(@Param("identifier") String identifier);
 
-    boolean existsByEmail(String email);
-
-    boolean existsByUsername(String username);
-
-    // Ranking dinâmico ordenado por XP acumulado
     List<User> findTop10ByOrderByXpDesc();
+
+    Boolean existsByEmail(String email);
+
+    Boolean existsByUsername(String username);
 }

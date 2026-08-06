@@ -15,16 +15,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider; 
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
 
-    private static final Pattern BEARER_PATTERN = Pattern.compile("^Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*$");
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        return path.startsWith("/api/auth/") || path.startsWith("/h2-console") || path.startsWith("/error");
+    }
 
     @Override
     protected void doFilterInternal(
@@ -32,46 +35,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (!BEARER_PATTERN.matcher(authHeader).matches()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        final String jwt = authHeader.substring(7);
 
-        jwt = authHeader.substring(7);
-        
         try {
-            userEmail = jwtTokenProvider.getUsernameFromJWT(jwt);
+            if (jwtTokenProvider.validateToken(jwt)) {
+                String usernameOrEmail = jwtTokenProvider.getUsernameFromJWT(jwt);
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                if (usernameOrEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(usernameOrEmail);
 
-                if (jwtTokenProvider.validateToken(jwt)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
                     );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
-            SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            logger.error("Erro ao autenticar usuário com JWT: ", e);
         }
 
         filterChain.doFilter(request, response);

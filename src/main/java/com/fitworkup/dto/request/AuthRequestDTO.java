@@ -1,6 +1,6 @@
 package com.fitworkup.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginRequestDTO {
+public class AuthRequestDTO {
 
-    @NotBlank(message = "O e-mail ou nome de usuário é obrigatório")
-    @JsonAlias({"email", "username"})
-    private String login;
+    @NotBlank(message = "O e-mail é obrigatório.")
+    @Email(message = "Insira um e-mail válido.")
+    private String email;
 
-    @NotBlank(message = "A senha é obrigatória")
+    @NotBlank(message = "A senha é obrigatória.")
     private String password;
 }

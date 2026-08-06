@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -22,13 +22,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserProfileDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
-        UserProfileDTO userProfile = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userProfile);
+        UserProfileDTO response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
-        JwtAuthResponseDTO tokenResponse = authService.login(request);
-        return ResponseEntity.ok(tokenResponse);
+        JwtAuthResponseDTO response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }

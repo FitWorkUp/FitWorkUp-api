@@ -12,10 +12,10 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt.secret}")
+    @Value("${app.jwt.secret:FitWorkUpSecretKeyForJwtSigningAndAuthentication2026123456789}")
     private String jwtSecret;
 
-    @Value("${app.jwt.expiration-ms}")
+    @Value("${app.jwt.expiration-ms:86400000}")
     private Long jwtExpirationInMs;
 
     private SecretKey getSigningKey() {
@@ -28,19 +28,19 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
-                .subject(username) // Atualizado: antes era setSubject()
-                .issuedAt(now)     // Atualizado: antes era setIssuedAt()
-                .expiration(expiryDate) // Atualizado: antes era setExpiration()
-                .signWith(getSigningKey(), Jwts.SIG.HS512) // Atualizado: usando a nova assinatura Jwts.SIG
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey(), Jwts.SIG.HS512)
                 .compact();
     }
 
     public String getUsernameFromJWT(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey()) // Atualizado: substitui setSigningKey()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token)    // Atualizado: substitui parseClaimsJws()
-                .getPayload()                // Atualizado: substitui getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
 

@@ -1,14 +1,16 @@
-package com.fitworkup.api.controllers;
+package com.fitworkup.controller;
 
 import com.fitworkup.dto.response.RankingItemDTO;
 import com.fitworkup.service.RankingService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/ranking")
+@RequestMapping("/api/ranking")
 public class RankingController {
 
     private final RankingService rankingService;
@@ -17,7 +19,7 @@ public class RankingController {
         this.rankingService = rankingService;
     }
 
-    @GetMapping("/top10")
+    @GetMapping
     public ResponseEntity<List<RankingItemDTO>> getTop10Ranking() {
         return ResponseEntity.ok(rankingService.getTop10Ranking());
     }

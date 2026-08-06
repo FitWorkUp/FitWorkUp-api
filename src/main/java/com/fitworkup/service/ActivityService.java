@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -84,6 +83,12 @@ public class ActivityService {
             verificationMethod = "WEARABLE_BIOMETRIC_LIVRE";
         }
 
+        // Converte a List<String> do request para String separada por vírgula para o banco
+        String fraudReasonsCsv = "";
+        if (request.getFraudReasons() != null && !request.getFraudReasons().isEmpty()) {
+            fraudReasonsCsv = String.join(",", request.getFraudReasons());
+        }
+
         Activity activity = Activity.builder()
                 .user(user)
                 .type(request.getType() != null ? request.getType().toUpperCase() : "CAMINHADA")
@@ -98,7 +103,7 @@ public class ActivityService {
                 .acceptedSteps(request.getAcceptedSteps())
                 .heldSteps(request.getHeldSteps())
                 .riskScore(request.getRiskScore())
-                .fraudReasons(request.getFraudReasons() != null ? request.getFraudReasons() : Collections.emptyList())
+                .fraudReasons(fraudReasonsCsv)
                 .build();
 
         return activityRepository.save(activity);

@@ -1,10 +1,10 @@
 package com.fitworkup.service;
 
 import com.fitworkup.models.User;
-import com.fitworkup.security.exceptions.UserNotFoundException;
 import com.fitworkup.repository.ActivityRepository;
 import com.fitworkup.repository.TokenRepository;
 import com.fitworkup.repository.UserRepository;
+import com.fitworkup.security.exceptions.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +16,8 @@ public class UserService {
     private final TokenRepository tokenRepository;
 
     public UserService(UserRepository userRepository, 
-                           ActivityRepository activityRepository, 
-                           TokenRepository tokenRepository) {
+                       ActivityRepository activityRepository, 
+                       TokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
         this.tokenRepository = tokenRepository;
@@ -35,7 +35,7 @@ public class UserService {
         tokenRepository.deleteByUserId(userId);
 
         // 3. Anonimiza o perfil mantendo apenas o registro numérico desvinculado
-        user.setName("Usuário Anônimo " + userId);
+        user.setUsername("anonimo_" + userId);
         user.setEmail("deleted_" + userId + "@deleted.fitworkup.com");
         user.setPassword("");
         user.setActive(false);

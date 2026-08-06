@@ -1,6 +1,7 @@
 package com.fitworkup.repository;
 
 import com.fitworkup.models.Friendship;
+import com.fitworkup.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,17 +13,19 @@ import java.util.Optional;
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
-    List<Friendship> findByUserIdAndStatus(Long userId, String status);
+    // Verifica se já existe um relacionamento (em qualquer direção)
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN TRUE ELSE FALSE END FROM Friendship f " +
+           "WHERE (f.user = :user AND f.friend = :friend) " +
+           "OR (f.user = :friend AND f.friend = :user)")
+    boolean existsFriendshipRelation(@Param("user") User user, @Param("friend") User friend);
 
-    List<Friendship> findByFriendIdAndStatus(Long friendId, String status);
+    // Busca um convite específico para poder aceitar/rejeitar
+    Optional<Friendship> findByUserAndFriend(User user, User friend);
 
-    Optional<Friendship> findByUserIdAndFriendId(Long userId, Long friendId);
+    // Lista os convites recebidos e pendentes de um usuário
+    List<Friendship> findByFriendAndStatus(User friend, String status);
 
-    // Checa vínculo em ambas as direções
-    @Query("SELECT f FROM Friendship f WHERE (f.user.id = :u1 AND f.friend.id = :u2) OR (f.user.id = :u2 AND f.friend.id = :u1)")
-    Optional<Friendship> findFriendshipBetween(@Param("u1") Long u1, @Param("u2") Long u2);
-
-    // Retorna todos os amigos confirmados de um usuário
-    @Query("SELECT f FROM Friendship f WHERE (f.user.id = :userId OR f.friend.id = :userId) AND f.status = 'ACCEPTED'")
-    List<Friendship> findAllAcceptedFriendships(@Param("userId") Long userId);
+    // Lista todos os amigos (status = ACCEPTED) onde o usuário enviou ou recebeu o convite
+    @Query("SELECT f FROM Friendship f WHERE f.status = 'ACCEPTED' AND (f.user = :user OR f.friend = :user)")
+    List<Friendship> findAllAcceptedFriendships(@Param("user") User user);
 }
