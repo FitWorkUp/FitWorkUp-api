@@ -1,15 +1,19 @@
 package com.fitworkup.dto.request;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RegisterRequestDTO {
 
     @NotBlank(message = "O nome de usuário é obrigatório.")
@@ -24,4 +28,8 @@ public class RegisterRequestDTO {
     @NotBlank(message = "A senha é obrigatória.")
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
     private String password;
+
+    @DecimalMin(value = "20.0", message = "O peso mínimo informado deve ser 20kg.")
+    @DecimalMax(value = "300.0", message = "O peso máximo informado deve ser 300kg.")
+    private Double weightKg;
 }

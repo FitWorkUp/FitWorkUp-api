@@ -15,10 +15,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Imports necessários para a segurança do Spring
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +28,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails { // CORREÇÃO AQUI: Assinando o contrato de segurança
+@Builder
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,30 +46,41 @@ public class User implements UserDetails { // CORREÇÃO AQUI: Assinando o contr
     
     @Column(name = "google_id", unique = true, length = 255)
     private String googleId;
+
+    // 💡 Campo essencial para o cálculo real de calorias (Cálculo Metabólico)
+    @Column(name = "weight_kg")
+    private Double weightKg;
     
     @Column(nullable = false)
+    @Builder.Default
     private Integer xp = 0;
 
     @Column(nullable = false)
-    private int level = 1;
+    @Builder.Default
+    private Integer level = 1;
 
     @Column(name = "fit_coins", nullable = false)
+    @Builder.Default
     private Integer fitcoins = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer streak = 0;
 
     @Column(name = "last_activity_date")
     private LocalDate lastActivityDate;
 
     @Column(nullable = false, length = 50, name = "avatar_border")
+    @Builder.Default
     private String avatarBorder = "DEFAULT";
 
     @Column(nullable = false, length = 50, name = "prestige_title")
+    @Builder.Default
     private String prestigeTitle = "NOVATO";
 
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<UserAchievement> userAchievements = new ArrayList<>();
 
     // ==========================================
@@ -77,13 +89,11 @@ public class User implements UserDetails { // CORREÇÃO AQUI: Assinando o contr
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Define o nível de acesso do usuário dentro do ecossistema FitWorkUp
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getUsername() {
-        // O Spring Security usa o e-mail como identificador único de login no nosso ecossistema
         return this.email;
     }
 

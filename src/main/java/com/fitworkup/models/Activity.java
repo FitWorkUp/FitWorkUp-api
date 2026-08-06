@@ -2,10 +2,13 @@ package com.fitworkup.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 @Entity
 @Table(name = "activities")
@@ -13,6 +16,7 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Activity {
 
     @Id
@@ -51,4 +55,20 @@ public class Activity {
 
     @Column(nullable = false, name = "verification_method", length = 40)
     private String verificationMethod = "GPS_TELEMETRY"; // GPS_TELEMETRY, WEARABLE_BIOMETRIC_LIVRE, etc.
+
+    // --- Novos Campos de Auditoria Anti-Fraude ---
+    @Column(nullable = false, name = "accepted_steps")
+    private Integer acceptedSteps;
+
+    @Column(nullable = false, name = "held_steps")
+    private Integer heldSteps;
+
+    @Column(nullable = false, name = "risk_score")
+    private Integer riskScore;
+
+    @ElementCollection
+    @CollectionTable(name = "activity_fraud_reasons", joinColumns = @JoinColumn(name = "activity_id"))
+    @Column(name = "reason")
+    @Builder.Default
+    private List<String> fraudReasons = new ArrayList<>();
 }

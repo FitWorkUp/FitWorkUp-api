@@ -1,12 +1,22 @@
 package com.fitworkup.repository;
 
 import com.fitworkup.models.Activity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
-    // Busca o histórico de atividades de um usuário específico, ordenando pelas mais recentes
+    @Query("SELECT a FROM Activity a WHERE a.user.id = :userId AND a.isValid = true AND a.timestamp >= :startOfDay")
+    List<Activity> findTodayValidActivities(@Param("userId") Long userId, @Param("startOfDay") LocalDateTime startOfDay);
+
     List<Activity> findByUserIdOrderByTimestampDesc(Long userId);
+
+    List<Activity> findByUserIdOrderByTimestampDesc(Long userId, Pageable pageable);
 }

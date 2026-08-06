@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RankingItemDTO {
-    private Long userId;
-    private Integer position;
-    private String username;
-    private Integer level;
+public class DailySummaryResponse {
+    private Integer totalSteps;
+    private Double totalDistanceKm;
+    private Integer totalCalories;
+    private Integer fitcoins;
     private Integer xp;
-    private String avatarBorder;
-    private String prestigeTitle;
+    private Integer level;
 }

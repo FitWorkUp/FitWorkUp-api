@@ -1,6 +1,8 @@
 package com.fitworkup.service;
 
 import com.fitworkup.dto.request.ActivityRequest;
+import com.fitworkup.dto.response.DailySummaryResponse;
+import com.fitworkup.enums.ActivityStatus;
 import com.fitworkup.models.Activity;
 import com.fitworkup.models.User;
 import com.fitworkup.repository.ActivityRepository;
@@ -8,7 +10,10 @@ import com.fitworkup.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ActivityService {
@@ -28,54 +33,73 @@ public class ActivityService {
         this.gamificationService = gamificationService;
     }
 
+    @Transactional(readOnly = true)
+    public DailySummaryResponse getTodaySummary(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        List<Activity> todayActivities = activityRepository.findTodayValidActivities(userId, startOfDay);
+
+        int totalSteps = todayActivities.stream().mapToInt(Activity::getSteps).sum();
+        double totalDistanceKm = todayActivities.stream().mapToDouble(Activity::getDistanceKm).sum();
+
+        double userWeight = (user.getWeightKg() != null && user.getWeightKg() > 0) ? user.getWeightKg() : 70.0;
+        int totalCalories = (int) (totalDistanceKm * userWeight * 0.75);
+
+        return DailySummaryResponse.builder()
+                .totalSteps(totalSteps)
+                .totalDistanceKm(totalDistanceKm)
+                .totalCalories(totalCalories)
+                .fitcoins(user.getFitcoins() != null ? user.getFitcoins() : 0)
+                .xp(user.getXp() != null ? user.getXp() : 0)
+                .level(user.getLevel() != null ? user.getLevel() : 1)
+                .build();
+    }
+
     @Transactional
     public Activity registerActivity(Long userId, ActivityRequest request) {
-        // 1. Aciona a auditoria física biomecânica (Gargalo anti-cheat padrão)
-        fraudDetectionService.validateActivityData(
-            request.getType(),
-            request.getDistanceKm(),
-            request.getSteps(),
-            request.getAvgSpeed()
-        );
+        ActivityStatus status = fraudDetectionService.evaluateActivity(request);
 
-        // 2. Busca o usuário para associar ao registro
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário inválido ou inexistente."));
 
-        // 3. Fórmula Algorítmica de Recompensa Base
-        int xpGained = (int) (request.getDistanceKm() * 50) + (request.getSteps() / 100);
+        boolean isValid = (status == ActivityStatus.APPROVED);
 
-        // Mapeamento do método de verificação para fins de auditoria e segurança
+        if (isValid) {
+            int xpGained = (int) (request.getDistanceKm() * 100) + (request.getSteps() / 100);
+
+            if (request.getAvgHeartRate() != null && Boolean.TRUE.equals(request.getTargetsAchieved())) {
+                xpGained = (int) (xpGained * 1.5);
+            }
+
+            int coinsGained = (int) (request.getDistanceKm() * 10);
+            gamificationService.rewardUserForActivity(userId, xpGained, coinsGained);
+        }
+
         String verificationMethod = "GPS_TELEMETRY";
-
-        // 4. Mecanismo de Bônus Biométrico Opcional (Wearable Integration)
         if (request.getAvgHeartRate() != null && Boolean.TRUE.equals(request.getTargetsAchieved())) {
-            // Aplica multiplicador de 1.5x se cumpriu as metas cardíacas/de esforço planejadas
-            xpGained = (int) (xpGained * 1.5);
             verificationMethod = "WEARABLE_BIOMETRIC_METAS";
         } else if (request.getAvgHeartRate() != null) {
             verificationMethod = "WEARABLE_BIOMETRIC_LIVRE";
         }
 
-        int coinsGained = (int) (xpGained * 0.2);
-
-        // 5. Injeta as moedas e o XP rodando as checagens automáticas de nível e conquistas
-        gamificationService.rewardUserForActivity(userId, xpGained, coinsGained);
-
-        // 6. Monta a entidade para gravação histórica
-        Activity activity = new Activity();
-        activity.setUser(user);
-        activity.setType(request.getType().toUpperCase());
-        activity.setDistanceKm(request.getDistanceKm());
-        activity.setSteps(request.getSteps());
-        activity.setAvgSpeed(request.getAvgSpeed());
-        activity.setTimestamp(LocalDateTime.now());
-        activity.setIsValid(true);
-        
-        // Novos metadados salvos na entidade (Garanta que esses campos existam no seu modelo 'Activity')
-        activity.setPlannedExerciseSessionId(request.getPlannedExerciseSessionId());
-        activity.setAvgHeartRate(request.getAvgHeartRate());
-        activity.setVerificationMethod(verificationMethod);
+        Activity activity = Activity.builder()
+                .user(user)
+                .type(request.getType() != null ? request.getType().toUpperCase() : "CAMINHADA")
+                .distanceKm(request.getDistanceKm())
+                .steps(request.getSteps())
+                .avgSpeed(request.getAvgSpeed())
+                .timestamp(LocalDateTime.now())
+                .isValid(isValid)
+                .plannedExerciseSessionId(request.getPlannedExerciseSessionId())
+                .avgHeartRate(request.getAvgHeartRate())
+                .verificationMethod(verificationMethod)
+                .acceptedSteps(request.getAcceptedSteps())
+                .heldSteps(request.getHeldSteps())
+                .riskScore(request.getRiskScore())
+                .fraudReasons(request.getFraudReasons() != null ? request.getFraudReasons() : Collections.emptyList())
+                .build();
 
         return activityRepository.save(activity);
     }

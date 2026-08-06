@@ -1,17 +1,21 @@
 package com.fitworkup.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.fitworkup.models.UserAchievement;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public interface UserAchievementRepository extends JpaRepository<UserAchievement, Long> {
-    
-    // Busca todas as conquistas que um usuário específico já desbloqueou
+
+    // JOIN FETCH carrega as informações do Achievement de forma eager em 1 consulta
+    @Query("SELECT ua FROM UserAchievement ua JOIN FETCH ua.achievement WHERE ua.user.id = :userId")
+    List<UserAchievement> findByUserIdWithDetails(@Param("userId") Long userId);
+
     List<UserAchievement> findByUserId(Long userId);
-    
-    // Verifica se o usuário já desbloqueou uma conquista específica para não dar prêmio duplicado
+
     boolean existsByUserIdAndAchievementId(Long userId, Long achievementId);
 }
