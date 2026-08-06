@@ -1,4 +1,4 @@
-package com.fitworkup.controller;
+package com.fitworkup.api.controllers;
 
 import com.fitworkup.dto.response.RankingItemDTO;
 import com.fitworkup.service.RankingService;
