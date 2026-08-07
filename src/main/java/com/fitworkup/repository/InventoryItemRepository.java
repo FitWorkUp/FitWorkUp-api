@@ -4,12 +4,10 @@ import com.fitworkup.models.InventoryItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, Long> {
 
     @Query("SELECT i FROM InventoryItem i JOIN FETCH i.storeItem WHERE i.user.id = :userId")
