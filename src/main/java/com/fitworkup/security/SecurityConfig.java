@@ -35,8 +35,8 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**", "/error").permitAll()
-                .requestMatchers("/api/friendships/**", "/api/ranking/**").authenticated()
+                .requestMatchers("/api/v1/auth/**", "/h2-console/**", "/error").permitAll()
+                .requestMatchers("/api/v1/friendships/**", "/api/ranking/**").authenticated()
                 .anyRequest().authenticated()
             );
 

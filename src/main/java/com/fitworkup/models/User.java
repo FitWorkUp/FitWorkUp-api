@@ -2,7 +2,6 @@ package com.fitworkup.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -20,17 +19,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,13 +39,13 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String password;
-    
+
     @Column(name = "google_id", unique = true, length = 255)
     private String googleId;
 
     @Column(name = "weight_kg")
     private Double weightKg;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private Integer xp = 0;
@@ -89,64 +84,12 @@ public class User implements UserDetails {
 
     @PrePersist
     public void prePersist() {
-        if (this.xp == null) this.xp = 0;
-        if (this.level == null) this.level = 1;
-        if (this.fitcoins == null) this.fitcoins = 0;
-        if (this.streak == null) this.streak = 0;
-        if (this.avatarBorder == null) this.avatarBorder = "DEFAULT";
-        if (this.prestigeTitle == null) this.prestigeTitle = "NOVATO";
-        if (this.active == null) this.active = true;
-    }
-
-    // Métodos acessores explícitos
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public Boolean getActive() {
-        return this.active;
-    }
-
-    // ==========================================
-    // IMPLEMENTAÇÃO USERDETAILS
-    // ==========================================
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-    }
-
-    @Override
-    public String getUsername() {
-        return this.email;
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override 
-    public boolean isAccountNonExpired() { 
-        return true; 
-    }
-
-    @Override 
-    public boolean isAccountNonLocked() { 
-        return true; 
-    }
-
-    @Override 
-    public boolean isCredentialsNonExpired() { 
-        return true; 
-    }
-
-    @Override 
-    public boolean isEnabled() { 
-        return Boolean.TRUE.equals(this.active); 
+        if (xp == null) xp = 0;
+        if (level == null) level = 1;
+        if (fitcoins == null) fitcoins = 0;
+        if (streak == null) streak = 0;
+        if (avatarBorder == null) avatarBorder = "DEFAULT";
+        if (prestigeTitle == null) prestigeTitle = "NOVATO";
+        if (active == null) active = true;
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/friendships")
+@RequestMapping("/api/v1/friendships")
 public class FriendshipController {
 
     private final FriendshipService friendshipService;
@@ -41,6 +41,18 @@ public class FriendshipController {
         Long currentUserId = getCurrentUserId(authentication);
         FriendshipResponseDTO response = friendshipService.acceptFriendRequest(currentUserId, id);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Void> rejectFriendRequest(Authentication authentication, @PathVariable Long id) {
+        friendshipService.rejectFriendRequest(getCurrentUserId(authentication), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removeFriendship(Authentication authentication, @PathVariable Long id) {
+        friendshipService.removeFriendship(getCurrentUserId(authentication), id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/pending")

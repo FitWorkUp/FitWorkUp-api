@@ -2,6 +2,8 @@ package com.fitworkup.api.controllers;
 
 import com.fitworkup.dto.request.ActivityRequest;
 import com.fitworkup.dto.response.DailySummaryResponse;
+import com.fitworkup.dto.response.ActivityResponse;
+import com.fitworkup.enums.ActivityStatus;
 import com.fitworkup.models.Activity;
 import com.fitworkup.models.User;
 import com.fitworkup.repository.UserRepository;
@@ -33,11 +35,14 @@ public class ActivityController {
     }
 
     @PostMapping
-    public ResponseEntity<Activity> registerActivity(@Valid @RequestBody ActivityRequest request, Principal principal) {
+    public ResponseEntity<ActivityResponse> registerActivity(@Valid @RequestBody ActivityRequest request, Principal principal) {
         User user = userRepository.findByEmailOrUsername(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
         Activity activity = activityService.registerActivity(user.getId(), request);
-        return ResponseEntity.ok(activity);
+        ActivityStatus status = Boolean.TRUE.equals(activity.getIsValid())
+                ? ActivityStatus.APPROVED
+                : ActivityStatus.UNDER_REVIEW;
+        return ResponseEntity.ok(ActivityResponse.fromEntity(activity, status));
     }
 }

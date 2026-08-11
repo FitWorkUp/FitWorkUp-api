@@ -63,6 +63,28 @@ public class FriendshipService {
         return mapToResponseDTO(updated);
     }
 
+    @Transactional
+    public void rejectFriendRequest(Long currentUserId, Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitação de amizade não encontrada."));
+        if (!friendship.getFriend().getId().equals(currentUserId) || !"PENDING".equals(friendship.getStatus())) {
+            throw new SecurityException("Apenas o destinatário pode rejeitar uma solicitação pendente.");
+        }
+        friendshipRepository.delete(friendship);
+    }
+
+    @Transactional
+    public void removeFriendship(Long currentUserId, Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Amizade não encontrada."));
+        boolean participant = friendship.getUser().getId().equals(currentUserId)
+                || friendship.getFriend().getId().equals(currentUserId);
+        if (!participant) {
+            throw new SecurityException("O usuário não participa desta amizade.");
+        }
+        friendshipRepository.delete(friendship);
+    }
+
     @Transactional(readOnly = true)
     public List<FriendshipResponseDTO> getPendingRequests(Long currentUserId) {
         User currentUser = userRepository.findById(currentUserId)

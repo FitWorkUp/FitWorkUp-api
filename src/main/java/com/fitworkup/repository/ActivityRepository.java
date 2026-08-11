@@ -19,6 +19,16 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUserIdOrderByTimestampDesc(Long userId, Pageable pageable);
 
+    @Query("SELECT COALESCE(SUM(a.distanceKm), 0.0) FROM Activity a WHERE a.user.id = :userId AND a.isValid = true")
+    Double sumValidDistanceByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COALESCE(SUM(a.steps), 0) FROM Activity a " +
+           "WHERE a.user.id = :userId AND a.isValid = true AND a.timestamp >= :startOfDay")
+    Long sumTodayValidSteps(
+            @Param("userId") Long userId,
+            @Param("startOfDay") LocalDateTime startOfDay
+    );
+
     @Modifying
     @Query("UPDATE Activity a SET a.verificationMethod = 'ANONYMIZED', a.riskScore = 0 WHERE a.user.id = :userId")
     void anonymizeGpsDataByUserId(@Param("userId") Long userId);

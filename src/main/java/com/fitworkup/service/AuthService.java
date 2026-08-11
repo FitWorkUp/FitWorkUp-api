@@ -21,15 +21,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final UserService userService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       JwtTokenProvider tokenProvider) {
+                       JwtTokenProvider tokenProvider,
+                       UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
+        this.userService = userService;
     }
 
     @Transactional
@@ -56,29 +59,23 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        return UserProfileDTO.builder()
-                .id(savedUser.getId())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .weightKg(savedUser.getWeightKg())
-                .xp(savedUser.getXp())
-                .level(savedUser.getLevel())
-                .fitcoins(savedUser.getFitcoins())
-                .streak(savedUser.getStreak())
-                .avatarBorder(savedUser.getAvatarBorder())
-                .prestigeTitle(savedUser.getPrestigeTitle())
-                .build();
+        return userService.toProfile(savedUser);
     }
 
     public JwtAuthResponseDTO login(LoginRequestDTO request) {
         User user = userRepository.findByEmailOrUsername(request.getLogin())
-                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas."));
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), request.getPassword())
         );
 
         String token = tokenProvider.generateToken(authentication.getName());
-        return new JwtAuthResponseDTO(token);
+        return JwtAuthResponseDTO.builder()
+                .accessToken(token)
+                .tokenType("Bearer")
+                .expiresIn(tokenProvider.getExpirationInMs() / 1000)
+                .user(userService.toProfile(user))
+                .build();
     }
 }

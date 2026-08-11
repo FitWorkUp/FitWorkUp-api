@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt.secret:FitWorkUpSecretKeyForJwtSigningAndAuthentication2026123456789}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
     @Value("${app.jwt.expiration-ms:86400000}")
@@ -33,6 +33,10 @@ public class JwtTokenProvider {
                 .expiration(expiryDate)
                 .signWith(getSigningKey(), Jwts.SIG.HS512)
                 .compact();
+    }
+
+    public long getExpirationInMs() {
+        return jwtExpirationInMs;
     }
 
     public String getUsernameFromJWT(String token) {

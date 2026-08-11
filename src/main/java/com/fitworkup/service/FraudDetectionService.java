@@ -34,7 +34,7 @@ public class FraudDetectionService {
         }
 
         if (fraudDetector.isStrideLengthImpossible(request.getDistanceKm(), request.getSteps())) {
-            throw new FraudDetectedException("A relação entre passos e distância percorrida quebra as leis da biomecânica.");
+            throw new FraudDetectedException("A relacao entre passos e distancia percorrida quebra as leis da biomecanica.");
         }
 
         // 3. Processamento dos Dados do StepFraudDetector (Telemetria do App)

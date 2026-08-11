@@ -16,4 +16,11 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
     List<InventoryItem> findByUserId(Long userId);
 
     Optional<InventoryItem> findByUserIdAndStoreItemId(Long userId, Long storeItemId);
+
+    @Query("SELECT i FROM InventoryItem i WHERE i.user.id = :userId " +
+           "AND UPPER(i.storeItem.category) = UPPER(:category) AND i.isEquipped = true")
+    List<InventoryItem> findEquippedByUserIdAndCategory(
+            @Param("userId") Long userId,
+            @Param("category") String category
+    );
 }

@@ -30,4 +30,10 @@ public class Achievement {
 
     @Column(name = "icon_name", length = 50)
     private String iconName; 
+
+    @Column(name = "criteria_type", length = 50)
+    private String criteriaType;
+
+    @Column(name = "target_value")
+    private Integer targetValue;
 }

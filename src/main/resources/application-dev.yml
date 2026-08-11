@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/fitworkup-dev;MODE=PostgreSQL;AUTO_SERVER=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+
+app:
+  jwt:
+    # Chave apenas para desenvolvimento local. Produção deve definir JWT_SECRET.
+    secret: ${JWT_SECRET:FitWorkUp-DEV-ONLY-JWT-Key-Change-Before-Production-2026-At-Least-64-Characters}
