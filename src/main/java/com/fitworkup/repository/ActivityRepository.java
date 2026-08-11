@@ -19,6 +19,13 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUserIdOrderByTimestampDesc(Long userId, Pageable pageable);
 
+    @Query("SELECT a FROM Activity a JOIN FETCH a.user " +
+           "WHERE a.isValid = true AND a.timestamp >= :start AND a.timestamp < :end")
+    List<Activity> findValidActivitiesBetween(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
     @Query("SELECT COALESCE(SUM(a.distanceKm), 0.0) FROM Activity a WHERE a.user.id = :userId AND a.isValid = true")
     Double sumValidDistanceByUserId(@Param("userId") Long userId);
 

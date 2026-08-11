@@ -289,4 +289,76 @@ class ApiApplicationTests {
 				.andExpect(jsonPath("$[0].unlocked").value(true));
 	}
 
+	@Test
+	void shouldRankApprovedWeeklyStepsAndExposeActiveDays() throws Exception {
+		String leaderToken = registerAndLoginForRanking(
+				"ranking_lider",
+				"ranking-lider@fitworkup.test"
+		);
+		String challengerToken = registerAndLoginForRanking(
+				"ranking_desafiante",
+				"ranking-desafiante@fitworkup.test"
+		);
+
+		registerRankingActivity(leaderToken, 2000, 1.5);
+		registerRankingActivity(challengerToken, 1000, 0.8);
+
+		mockMvc.perform(get("/api/ranking/weekly")
+				.header("Authorization", "Bearer " + leaderToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.weekStart").isNotEmpty())
+				.andExpect(jsonPath("$.weekEnd").isNotEmpty())
+				.andExpect(jsonPath("$.stepsPerPoint").value(100))
+				.andExpect(jsonPath("$.entries[0].username").value("ranking_lider"))
+				.andExpect(jsonPath("$.entries[0].validatedSteps").value(2000))
+				.andExpect(jsonPath("$.entries[0].movementPoints").value(20))
+				.andExpect(jsonPath("$.entries[0].activeDays").value(1))
+				.andExpect(jsonPath("$.entries[0].currentUser").value(true));
+	}
+
+	private String registerAndLoginForRanking(String username, String email) throws Exception {
+		mockMvc.perform(post("/api/v1/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{
+						  "username": "%s",
+						  "email": "%s",
+						  "password": "senha123"
+						}
+						""".formatted(username, email)))
+				.andExpect(status().isCreated());
+
+		String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{
+						  "login": "%s",
+						  "password": "senha123"
+						}
+						""".formatted(email)))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		return objectMapper.readTree(loginResponse).get("accessToken").asText();
+	}
+
+	private void registerRankingActivity(String token, int steps, double distanceKm) throws Exception {
+		mockMvc.perform(post("/api/v1/activities")
+				.header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{
+						  "type": "CAMINHADA",
+						  "distanceKm": %s,
+						  "steps": %d,
+						  "avgSpeed": 5.0,
+						  "acceptedSteps": %d,
+						  "heldSteps": 0,
+						  "riskScore": 0,
+						  "fraudReasons": []
+						}
+						""".formatted(distanceKm, steps, steps)))
+				.andExpect(status().isOk());
+	}
+
 }
