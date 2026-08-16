@@ -39,6 +39,7 @@ public class RankingService {
     public WeeklyRankingResponseDTO getWeeklyRanking(String currentIdentifier) {
         User currentUser = userRepository.findByEmailOrUsername(currentIdentifier)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+        
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = weekStart.plusDays(6);
@@ -46,17 +47,24 @@ public class RankingService {
         LocalDateTime endExclusive = weekStart.plusWeeks(1).atStartOfDay();
 
         Map<Long, WeeklyUserStats> statsByUser = new HashMap<>();
-        for (Activity activity : activityRepository.findValidActivitiesBetween(startInclusive, endExclusive)) {
-            User user = activity.getUser();
-            WeeklyUserStats stats = statsByUser.computeIfAbsent(
-                    user.getId(),
-                    ignored -> new WeeklyUserStats(user)
-            );
-            stats.add(activity);
+
+        // 1. Carrega TODOS os usuários ativos cadastrados no sistema (incluindo Bots)
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            if (Boolean.TRUE.equals(user.getActive())) {
+                statsByUser.put(user.getId(), new WeeklyUserStats(user));
+            }
         }
 
-        statsByUser.computeIfAbsent(currentUser.getId(), ignored -> new WeeklyUserStats(currentUser));
+        // 2. Acumula os passos das atividades registradas na semana corrente
+        for (Activity activity : activityRepository.findValidActivitiesBetween(startInclusive, endExclusive)) {
+            User user = activity.getUser();
+            if (statsByUser.containsKey(user.getId())) {
+                statsByUser.get(user.getId()).add(activity);
+            }
+        }
 
+        // 3. Ordena os usuários por passos validados descrescente e dias ativos
         List<WeeklyUserStats> orderedStats = new ArrayList<>(statsByUser.values());
         orderedStats.sort(
                 Comparator.comparingLong(WeeklyUserStats::validatedSteps).reversed()
@@ -64,6 +72,7 @@ public class RankingService {
                         .thenComparing(stats -> stats.user().getUsername(), String.CASE_INSENSITIVE_ORDER)
         );
 
+        // 4. Constrói a lista de DTOs do Ranking
         List<RankingItemDTO> entries = new ArrayList<>();
         for (int index = 0; index < orderedStats.size(); index++) {
             WeeklyUserStats stats = orderedStats.get(index);
@@ -104,7 +113,9 @@ public class RankingService {
                     ? activity.getAcceptedSteps()
                     : activity.getSteps() != null ? activity.getSteps() : 0;
             validatedSteps += Math.max(acceptedSteps, 0);
-            activeDates.add(activity.getTimestamp().toLocalDate());
+            if (activity.getTimestamp() != null) {
+                activeDates.add(activity.getTimestamp().toLocalDate());
+            }
         }
 
         private User user() {
