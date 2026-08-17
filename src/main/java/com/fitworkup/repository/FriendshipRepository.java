@@ -26,4 +26,13 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     // Lista todos os amigos (status = ACCEPTED) onde o usuário enviou ou recebeu o convite
     @Query("SELECT f FROM Friendship f WHERE f.status = 'ACCEPTED' AND (f.user = :user OR f.friend = :user)")
     List<Friendship> findAllAcceptedFriendships(@Param("user") User user);
+
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN TRUE ELSE FALSE END FROM Friendship f " +
+           "WHERE f.status = 'ACCEPTED' AND " +
+           "((f.user = :firstUser AND f.friend = :secondUser) " +
+           "OR (f.user = :secondUser AND f.friend = :firstUser))")
+    boolean existsAcceptedFriendship(
+            @Param("firstUser") User firstUser,
+            @Param("secondUser") User secondUser
+    );
 }
