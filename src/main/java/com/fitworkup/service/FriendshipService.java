@@ -112,10 +112,19 @@ public class FriendshipService {
                 .id(friendship.getId())
                 .userId(friendship.getUser().getId())
                 .username(friendship.getUser().getUsername())
+                .userLevel(friendship.getUser().getLevel())
+                .userAvatarKey(avatarKeyOf(friendship.getUser()))
                 .friendId(friendship.getFriend().getId())
                 .friendUsername(friendship.getFriend().getUsername())
+                .friendLevel(friendship.getFriend().getLevel())
+                .friendAvatarKey(avatarKeyOf(friendship.getFriend()))
                 .status(friendship.getStatus())
                 .createdAt(friendship.getCreatedAt())
                 .build();
+    }
+
+    private String avatarKeyOf(User user) {
+        String avatarKey = user.getAvatarKey();
+        return avatarKey == null || avatarKey.isBlank() ? "ICONMAN1" : avatarKey;
     }
 }

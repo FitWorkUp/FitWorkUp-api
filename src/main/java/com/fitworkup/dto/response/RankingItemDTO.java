@@ -18,6 +18,7 @@ public class RankingItemDTO {
     private Long movementPoints;
     private Integer activeDays;
     private String avatarBorder;
+    private String avatarKey;
     private String prestigeTitle;
     private Boolean currentUser;
 }

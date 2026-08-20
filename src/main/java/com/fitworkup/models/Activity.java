@@ -35,6 +35,9 @@ public class Activity {
 
     private Integer durationSeconds;
 
+    @Column(name = "group_session_id")
+    private Long groupSessionId;
+
     private Integer caloriesBurned;
 
     private Integer steps;

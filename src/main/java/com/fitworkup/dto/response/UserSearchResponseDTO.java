@@ -14,5 +14,6 @@ public class UserSearchResponseDTO {
     private String username;
     private Integer level;
     private String avatarBorder;
+    private String avatarKey;
     private String prestigeTitle;
 }

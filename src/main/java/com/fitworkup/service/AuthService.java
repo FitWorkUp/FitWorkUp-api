@@ -54,6 +54,7 @@ public class AuthService {
                 .fitcoins(0)
                 .streak(0)
                 .avatarBorder("DEFAULT")
+                .avatarKey("ICONMAN1")
                 .prestigeTitle("NOVATO")
                 .build();
 

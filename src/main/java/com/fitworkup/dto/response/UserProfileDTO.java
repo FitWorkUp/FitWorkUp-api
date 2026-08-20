@@ -21,5 +21,6 @@ public class UserProfileDTO {
     private Integer streak;
     private Double totalDistanceKm;
     private String avatarBorder;
+    private String avatarKey;
     private String prestigeTitle;
 }

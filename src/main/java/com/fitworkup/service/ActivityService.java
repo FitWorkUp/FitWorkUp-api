@@ -89,6 +89,7 @@ public class ActivityService {
                 .type(request.getType() != null ? request.getType().toUpperCase() : "CAMINHADA")
                 .distanceKm(request.getDistanceKm())
                 .steps(request.getSteps())
+                .groupSessionId(request.getGroupSessionId())
                 .caloriesBurned(caloriesBurned)
                 .avgSpeed(request.getAvgSpeed())
                 .timestamp(LocalDateTime.now())

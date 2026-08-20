@@ -20,6 +20,7 @@ public class PublicUserProfileDTO {
     private Integer streak;
     private Double totalDistanceKm;
     private String avatarBorder;
+    private String avatarKey;
     private String prestigeTitle;
     private List<UserAchievementDTO> achievements;
 }

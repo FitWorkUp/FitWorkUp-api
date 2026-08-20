@@ -4,17 +4,21 @@ import com.fitworkup.dto.response.UserProfileDTO;
 import com.fitworkup.dto.response.PublicUserProfileDTO;
 import com.fitworkup.dto.response.UserSearchResponseDTO;
 import com.fitworkup.dto.response.UserAchievementDTO;
+import com.fitworkup.dto.request.UpdateAvatarRequest;
 import com.fitworkup.models.User;
 import com.fitworkup.repository.UserRepository;
 import com.fitworkup.repository.FriendshipRepository;
 import com.fitworkup.service.UserService;
 import com.fitworkup.service.AchievementService;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,6 +47,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(principal.getName()));
     }
 
+    @PatchMapping("/me/avatar")
+    public ResponseEntity<UserProfileDTO> updateMyAvatar(
+            Principal principal,
+            @Valid @RequestBody UpdateAvatarRequest request) {
+        return ResponseEntity.ok(userService.updateAvatar(principal.getName(), request.avatarKey()));
+    }
+
     @GetMapping("/me/achievements")
     public ResponseEntity<List<UserAchievementDTO>> getMyAchievements(Principal principal) {
         User currentUser = userRepository.findByEmailOrUsername(principal.getName())
@@ -66,6 +77,7 @@ public class UserController {
                         .username(user.getUsername())
                         .level(user.getLevel())
                         .avatarBorder(user.getAvatarBorder())
+                        .avatarKey(user.getAvatarKey())
                         .prestigeTitle(user.getPrestigeTitle())
                         .build())
                 .toList();
@@ -97,6 +109,7 @@ public class UserController {
                 .streak(profile.getStreak())
                 .totalDistanceKm(profile.getTotalDistanceKm())
                 .avatarBorder(profile.getAvatarBorder())
+                .avatarKey(profile.getAvatarKey())
                 .prestigeTitle(profile.getPrestigeTitle())
                 .achievements(achievementService.getUserAchievements(friend.getId()))
                 .build());

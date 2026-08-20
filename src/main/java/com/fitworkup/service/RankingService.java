@@ -86,6 +86,7 @@ public class RankingService {
                     .movementPoints(stats.validatedSteps() / STEPS_PER_POINT)
                     .activeDays(stats.activeDays())
                     .avatarBorder(user.getAvatarBorder())
+                    .avatarKey(user.getAvatarKey())
                     .prestigeTitle(user.getPrestigeTitle())
                     .currentUser(user.getId().equals(currentUser.getId()))
                     .build());

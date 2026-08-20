@@ -16,8 +16,12 @@ public class FriendshipResponseDTO {
     private Long id;
     private Long userId;
     private String username;
+    private Integer userLevel;
+    private String userAvatarKey;
     private Long friendId;
     private String friendUsername;
+    private Integer friendLevel;
+    private String friendAvatarKey;
     private String status;
     private LocalDateTime createdAt;
 }

@@ -69,6 +69,15 @@ public class User {
     @Builder.Default
     private String avatarBorder = "DEFAULT";
 
+    @Column(
+            name = "avatar_key",
+            nullable = false,
+            length = 30,
+            columnDefinition = "varchar(30) default 'ICONMAN1'"
+    )
+    @Builder.Default
+    private String avatarKey = "ICONMAN1";
+
     @Column(nullable = false, length = 50, name = "prestige_title")
     @Builder.Default
     private String prestigeTitle = "NOVATO";
@@ -89,6 +98,7 @@ public class User {
         if (fitcoins == null) fitcoins = 0;
         if (streak == null) streak = 0;
         if (avatarBorder == null) avatarBorder = "DEFAULT";
+        if (avatarKey == null) avatarKey = "ICONMAN1";
         if (prestigeTitle == null) prestigeTitle = "NOVATO";
         if (active == null) active = true;
     }

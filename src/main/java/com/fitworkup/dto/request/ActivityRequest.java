@@ -31,6 +31,8 @@ public class ActivityRequest {
     private Integer avgHeartRate;            // Média de batimentos cardíacos (BPM)
     private Boolean targetsAchieved;         // Indica se o usuário cumpriu as metas do plano
 
+    private Long groupSessionId;             // Sala compartilhada; esforço continua individual
+
     // --- Novos Campos de Auditoria Anti-Fraude ---
     @NotNull(message = "A quantidade de passos aceitos é obrigatória.")
     @Min(value = 0, message = "Passos aceitos não podem ser negativos.")

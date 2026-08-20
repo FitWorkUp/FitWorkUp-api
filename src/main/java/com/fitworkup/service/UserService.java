@@ -9,8 +9,16 @@ import com.fitworkup.security.exceptions.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+import java.util.Set;
+
 @Service
 public class UserService {
+
+    private static final Set<String> ALLOWED_AVATARS = Set.of(
+            "ICONMAN1", "ICONMAN2", "ICONMAN3", "ICONMAN4",
+            "ICONWOMAN1", "ICONWOMAN2", "ICONWOMAN3", "ICONWOMAN4"
+    );
 
     private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
@@ -48,8 +56,21 @@ public class UserService {
                 .streak(user.getStreak() != null ? user.getStreak() : 0)
                 .totalDistanceKm(totalDistanceKm != null ? totalDistanceKm : 0.0)
                 .avatarBorder(user.getAvatarBorder())
+                .avatarKey(user.getAvatarKey())
                 .prestigeTitle(user.getPrestigeTitle())
                 .build();
+    }
+
+    @Transactional
+    public UserProfileDTO updateAvatar(String identifier, String rawAvatarKey) {
+        User user = userRepository.findByEmailOrUsername(identifier)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+        String avatarKey = rawAvatarKey.trim().toUpperCase(Locale.ROOT);
+        if (!ALLOWED_AVATARS.contains(avatarKey)) {
+            throw new IllegalArgumentException("Avatar inválido.");
+        }
+        user.setAvatarKey(avatarKey);
+        return toProfile(userRepository.save(user));
     }
 
     @Transactional
