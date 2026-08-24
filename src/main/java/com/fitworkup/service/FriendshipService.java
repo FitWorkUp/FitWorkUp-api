@@ -17,10 +17,14 @@ public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final AchievementService achievementService;
 
-    public FriendshipService(FriendshipRepository friendshipRepository, UserRepository userRepository) {
+    public FriendshipService(FriendshipRepository friendshipRepository,
+                             UserRepository userRepository,
+                             AchievementService achievementService) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
+        this.achievementService = achievementService;
     }
 
     @Transactional
@@ -60,6 +64,8 @@ public class FriendshipService {
 
         friendship.setStatus("ACCEPTED");
         Friendship updated = friendshipRepository.save(friendship);
+        achievementService.evaluateAllAchievements(friendship.getUser().getId());
+        achievementService.evaluateAllAchievements(friendship.getFriend().getId());
         return mapToResponseDTO(updated);
     }
 

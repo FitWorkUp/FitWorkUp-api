@@ -44,7 +44,9 @@ public class ActivityService {
         );
 
         int totalSteps = todayActivities.stream()
-                .mapToInt(activity -> activity.getSteps() != null ? activity.getSteps() : 0)
+                .mapToInt(activity -> activity.getAcceptedSteps() != null
+                        ? Math.max(activity.getAcceptedSteps(), 0)
+                        : (activity.getSteps() != null ? Math.max(activity.getSteps(), 0) : 0))
                 .sum();
         double totalDistanceKm = todayActivities.stream()
                 .mapToDouble(activity -> activity.getDistanceKm() != null ? activity.getDistanceKm() : 0.0)
@@ -105,13 +107,16 @@ public class ActivityService {
 
         Activity savedActivity = activityRepository.saveAndFlush(activity);
         if (isValid) {
-            int xpGained = (int) (request.getDistanceKm() * 100) + (request.getSteps() / 100);
+            int rewardedSteps = request.getAcceptedSteps() != null
+                    ? Math.max(request.getAcceptedSteps(), 0)
+                    : Math.max(request.getSteps(), 0);
+            int xpGained = (int) (request.getDistanceKm() * 100) + (rewardedSteps / 100);
             if (request.getAvgHeartRate() != null && Boolean.TRUE.equals(request.getTargetsAchieved())) {
                 xpGained = (int) (xpGained * 1.5);
             }
             int coinsGained = (int) (request.getDistanceKm() * 10);
             gamificationService.rewardUserForActivity(userId, xpGained, coinsGained);
-            achievementService.evaluateDailyStepAchievements(userId);
+            achievementService.evaluateAllAchievements(userId);
         }
 
         return savedActivity;

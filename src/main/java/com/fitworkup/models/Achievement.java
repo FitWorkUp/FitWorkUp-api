@@ -16,6 +16,9 @@ public class Achievement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, length = 10)
+    private String code;
+
     @Column(nullable = false, unique = true, length = 100)
     private String name; 
 
@@ -36,4 +39,7 @@ public class Achievement {
 
     @Column(name = "target_value")
     private Integer targetValue;
+
+    @Column(name = "title_reward", length = 50)
+    private String titleReward;
 }

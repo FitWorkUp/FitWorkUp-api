@@ -19,6 +19,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUserIdOrderByTimestampDesc(Long userId, Pageable pageable);
 
+    List<Activity> findByUserIdAndIsValidTrueOrderByTimestampAsc(Long userId);
+
     @Query("SELECT a FROM Activity a JOIN FETCH a.user " +
            "WHERE a.isValid = true AND a.timestamp >= :start AND a.timestamp < :end")
     List<Activity> findValidActivitiesBetween(
@@ -29,7 +31,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     @Query("SELECT COALESCE(SUM(a.distanceKm), 0.0) FROM Activity a WHERE a.user.id = :userId AND a.isValid = true")
     Double sumValidDistanceByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COALESCE(SUM(a.steps), 0) FROM Activity a " +
+    @Query("SELECT COALESCE(SUM(COALESCE(a.acceptedSteps, a.steps, 0)), 0) FROM Activity a " +
            "WHERE a.user.id = :userId AND a.isValid = true AND a.timestamp >= :startOfDay")
     Long sumTodayValidSteps(
             @Param("userId") Long userId,

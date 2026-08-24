@@ -8,6 +8,11 @@ import java.util.List;
 
 public interface AchievementRepository extends JpaRepository<Achievement, Long> {
     Optional<Achievement> findByName(String name);
+    Optional<Achievement> findByCode(String code);
     boolean existsByName(String name);
     List<Achievement> findByCriteriaTypeOrderByTargetValueAsc(String criteriaType);
+    Optional<Achievement> findFirstByCriteriaTypeAndTargetValueAndCodeIsNull(
+            String criteriaType,
+            Integer targetValue
+    );
 }
