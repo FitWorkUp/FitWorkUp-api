@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("dev")
+@Profile("!test")
 public class DevelopmentStoreDataConfig implements ApplicationRunner {
 
     private final StoreItemRepository storeItemRepository;
