@@ -25,7 +25,11 @@ public class DevelopmentStoreDataConfig implements ApplicationRunner {
                 "Uma moldura vermelha para destacar seu perfil.", "\uD83D\uDD34"
         );
         createCosmetic(
-                "Moldura Esmeralda", 25,
+                "Moldura Ametista", 10,
+                "Uma moldura roxa para destacar seu perfil.", "\uD83D\uDFE3"
+        );   
+        createCosmetic(
+                "Moldura Esmeralda", 10,
                 "Uma moldura verde desbloqueada com FitCoins.", "\uD83D\uDFE2"
         );
         createCosmetic(
@@ -33,12 +37,12 @@ public class DevelopmentStoreDataConfig implements ApplicationRunner {
                 "A moldura dourada mais rara da loja.", "\uD83D\uDFE1"
         );
         createBoost(
-                "2x XP por 30 min", 20,
+                "2x XP por 30 min", 50,
                 "Dobra o XP recebido em atividades durante 30 minutos.", "\u26A1",
                 StoreEffectType.XP_MULTIPLIER, 2.0, 30
         );
         createBoost(
-                "2x FitCoins por 30 min", 20,
+                "2x FitCoins por 30 min", 70,
                 "Dobra os FitCoins recebidos em atividades durante 30 minutos.", "\uD83E\uDE99",
                 StoreEffectType.FITCOINS_MULTIPLIER, 2.0, 30
         );
