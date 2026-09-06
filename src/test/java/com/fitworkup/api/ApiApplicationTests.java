@@ -58,8 +58,7 @@ class ApiApplicationTests {
 						{
 						  "username": "atleta_teste",
 						  "email": "atleta@fitworkup.test",
-						  "password": "senha123",
-						  "weightKg": 72.5
+						  "password": "senha123"
 						}
 						"""))
 				.andExpect(status().isCreated())
@@ -223,15 +222,14 @@ class ApiApplicationTests {
 	}
 
 	@Test
-	void shouldCalculateCaloriesAndUnlockDailyStepAchievement() throws Exception {
+	void shouldUpdateLastActivityDateAndUnlockDailyStepAchievement() throws Exception {
 		mockMvc.perform(post("/api/v1/auth/register")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 						{
 						  "username": "passos_teste",
 						  "email": "passos@fitworkup.test",
-						  "password": "senha123",
-						  "weightKg": 70.0
+						  "password": "senha123"
 						}
 						"""))
 				.andExpect(status().isCreated());
@@ -273,14 +271,11 @@ class ApiApplicationTests {
 						  "fraudReasons": []
 						}
 						"""))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.caloriesBurned").value(42));
+				.andExpect(status().isOk());
 
-		mockMvc.perform(get("/api/v1/activities/today-summary")
-				.header("Authorization", "Bearer " + token))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.totalSteps").value(1000))
-				.andExpect(jsonPath("$.totalCalories").value(42));
+		User activeUser = userRepository.findByEmail("passos@fitworkup.test").orElseThrow();
+		org.junit.jupiter.api.Assertions.assertEquals(java.time.LocalDate.now(), activeUser.getLastActivityDate());
+		org.junit.jupiter.api.Assertions.assertEquals(1, activeUser.getStreak());
 
 		mockMvc.perform(get("/api/v1/users/me/achievements")
 				.header("Authorization", "Bearer " + token))

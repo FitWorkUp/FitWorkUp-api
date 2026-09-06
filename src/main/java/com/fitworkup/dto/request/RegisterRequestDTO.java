@@ -29,7 +29,4 @@ public class RegisterRequestDTO {
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
     private String password;
 
-    @DecimalMin(value = "20.0", message = "O peso mínimo informado deve ser 20kg.")
-    @DecimalMax(value = "300.0", message = "O peso máximo informado deve ser 300kg.")
-    private Double weightKg;
 }

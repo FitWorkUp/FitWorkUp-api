@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class DailySummaryResponse {
     private Integer totalSteps;
     private Double totalDistanceKm;
-    private Integer totalCalories;
     private Integer fitcoins;
     private Integer xp;
     private Integer level;

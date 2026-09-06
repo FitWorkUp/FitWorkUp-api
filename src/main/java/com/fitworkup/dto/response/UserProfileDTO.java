@@ -13,7 +13,6 @@ public class UserProfileDTO {
     private Long id;
     private String username;
     private String email;
-    private Double weightKg; // Exposto para ser editável na tela de perfil no app
     private Integer xp;
     private Integer nextLevelXp;
     private Integer level;

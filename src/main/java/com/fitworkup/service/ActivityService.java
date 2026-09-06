@@ -51,16 +51,10 @@ public class ActivityService {
         double totalDistanceKm = todayActivities.stream()
                 .mapToDouble(activity -> activity.getDistanceKm() != null ? activity.getDistanceKm() : 0.0)
                 .sum();
-        int totalCalories = todayActivities.stream()
-                .mapToInt(activity -> activity.getCaloriesBurned() != null
-                        ? activity.getCaloriesBurned()
-                        : calculateCalories(user, activity.getDistanceKm(), activity.getSteps()))
-                .sum();
 
         return DailySummaryResponse.builder()
                 .totalSteps(totalSteps)
                 .totalDistanceKm(totalDistanceKm)
-                .totalCalories(totalCalories)
                 .fitcoins(user.getFitcoins() != null ? user.getFitcoins() : 0)
                 .xp(user.getXp() != null ? user.getXp() : 0)
                 .level(user.getLevel() != null ? user.getLevel() : 1)
@@ -84,7 +78,6 @@ public class ActivityService {
         String fraudReasonsCsv = request.getFraudReasons() == null
                 ? ""
                 : String.join(",", request.getFraudReasons());
-        int caloriesBurned = calculateCalories(user, request.getDistanceKm(), request.getSteps());
 
         Activity activity = Activity.builder()
                 .user(user)
@@ -92,7 +85,6 @@ public class ActivityService {
                 .distanceKm(request.getDistanceKm())
                 .steps(request.getSteps())
                 .groupSessionId(request.getGroupSessionId())
-                .caloriesBurned(caloriesBurned)
                 .avgSpeed(request.getAvgSpeed())
                 .timestamp(LocalDateTime.now())
                 .isValid(isValid)
@@ -107,6 +99,7 @@ public class ActivityService {
 
         Activity savedActivity = activityRepository.saveAndFlush(activity);
         if (isValid) {
+            updateActivityStreak(user, savedActivity.getTimestamp().toLocalDate());
             int rewardedSteps = request.getAcceptedSteps() != null
                     ? Math.max(request.getAcceptedSteps(), 0)
                     : Math.max(request.getSteps(), 0);
@@ -122,13 +115,22 @@ public class ActivityService {
         return savedActivity;
     }
 
-    private int calculateCalories(User user, Double distanceKm, Integer steps) {
-        double safeDistance = distanceKm != null ? Math.max(distanceKm, 0.0) : 0.0;
-        int safeSteps = steps != null ? Math.max(steps, 0) : 0;
-        double weight = user.getWeightKg() != null && user.getWeightKg() > 0
-                ? user.getWeightKg() : 70.0;
-        int byDistance = (int) Math.round(safeDistance * weight * 0.75);
-        int bySteps = (int) Math.round(safeSteps * 0.04);
-        return Math.max(byDistance, bySteps);
+    private void updateActivityStreak(User user, LocalDate activityDate) {
+        LocalDate lastActivityDate = user.getLastActivityDate();
+
+        if (lastActivityDate == null) {
+            user.setStreak(1);
+        } else if (lastActivityDate.equals(activityDate)) {
+            return;
+        } else if (lastActivityDate.equals(activityDate.minusDays(1))) {
+            int currentStreak = user.getStreak() != null ? user.getStreak() : 0;
+            user.setStreak(currentStreak + 1);
+        } else {
+            user.setStreak(1);
+        }
+
+        user.setLastActivityDate(activityDate);
+        userRepository.save(user);
     }
+
 }

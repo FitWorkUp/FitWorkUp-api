@@ -43,9 +43,6 @@ public class User {
     @Column(name = "google_id", unique = true, length = 255)
     private String googleId;
 
-    @Column(name = "weight_kg")
-    private Double weightKg;
-
     @Column(nullable = false)
     @Builder.Default
     private Integer xp = 0;

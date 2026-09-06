@@ -48,7 +48,6 @@ public class UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .weightKg(user.getWeightKg())
                 .xp(user.getXp() != null ? user.getXp() : 0)
                 .nextLevelXp(level * 1000)
                 .level(level)

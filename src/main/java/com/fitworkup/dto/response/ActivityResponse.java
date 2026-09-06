@@ -20,7 +20,6 @@ public class ActivityResponse {
     private String type;
     private Double distanceKm;
     private Integer steps;
-    private Integer caloriesBurned;
     private Double avgSpeed;
     private LocalDateTime timestamp;
     private Boolean isValid;
@@ -42,7 +41,6 @@ public class ActivityResponse {
                 .type(activity.getType())
                 .distanceKm(activity.getDistanceKm())
                 .steps(activity.getSteps())
-                .caloriesBurned(activity.getCaloriesBurned())
                 .avgSpeed(activity.getAvgSpeed())
                 .timestamp(activity.getTimestamp())
                 .isValid(activity.getIsValid())

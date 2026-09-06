@@ -25,7 +25,4 @@ public class RegisterRequest {
     @NotBlank(message = "A senha é obrigatória.")
     @Size(min = 6, message = "A senha deve conter no mínimo 6 caracteres.")
     private String password;
-
-    @NotNull(message = "O peso é obrigatório.")
-    private Double weightKg;
 }

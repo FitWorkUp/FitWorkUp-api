@@ -48,7 +48,6 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail().toLowerCase().trim())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .weightKg(request.getWeightKg() != null ? request.getWeightKg() : 70.0)
                 .xp(0)
                 .level(1)
                 .fitcoins(0)
