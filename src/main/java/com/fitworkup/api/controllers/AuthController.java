@@ -2,6 +2,7 @@ package com.fitworkup.api.controllers;
 
 import com.fitworkup.dto.request.LoginRequestDTO;
 import com.fitworkup.dto.request.ForgotPasswordRequestDTO;
+import com.fitworkup.dto.request.GoogleLoginRequestDTO;
 import com.fitworkup.dto.request.RegisterRequestDTO;
 import com.fitworkup.dto.request.ResetPasswordRequestDTO;
 import com.fitworkup.dto.response.JwtAuthResponseDTO;
@@ -36,6 +37,12 @@ public class AuthController {
     public ResponseEntity<JwtAuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         JwtAuthResponseDTO response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<JwtAuthResponseDTO> loginWithGoogle(
+            @Valid @RequestBody GoogleLoginRequestDTO request) {
+        return ResponseEntity.ok(authService.loginWithGoogle(request));
     }
 
     @PostMapping("/password/forgot")
