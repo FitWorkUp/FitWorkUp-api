@@ -29,7 +29,8 @@ app:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:}
+            # Client ID Web usado como audience pelo token emitido ao aplicativo Android.
+            client-id: 661125031603-t2q5jl93ahrgdttvkd50ie2rieq9p4fu.apps.googleusercontent.com
             client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope:
               - profile

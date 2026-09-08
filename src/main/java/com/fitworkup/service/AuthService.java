@@ -14,12 +14,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 @Service
 public class AuthService {
@@ -29,20 +29,23 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserService userService;
-    private final GoogleIdTokenVerifier googleIdTokenVerifier;
+    private final JwtDecoder googleJwtDecoder;
+    private final String googleClientId;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserService userService,
-                       GoogleIdTokenVerifier googleIdTokenVerifier) {
+                       JwtDecoder googleJwtDecoder,
+                       @Value("${app.security.oauth2.client.registration.google.client-id}") String googleClientId) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userService = userService;
-        this.googleIdTokenVerifier = googleIdTokenVerifier;
+        this.googleJwtDecoder = googleJwtDecoder;
+        this.googleClientId = googleClientId;
     }
 
     @Transactional
@@ -91,21 +94,24 @@ public class AuthService {
 
     @Transactional
     public JwtAuthResponseDTO loginWithGoogle(GoogleLoginRequestDTO request) {
-        GoogleIdToken googleToken;
+        Jwt googleToken;
         try {
-            googleToken = googleIdTokenVerifier.verify(request.getIdToken());
-        } catch (IOException | GeneralSecurityException ex) {
-            throw new IllegalArgumentException("Não foi possível validar o token do Google.", ex);
+            googleToken = googleJwtDecoder.decode(request.getIdToken());
+        } catch (JwtException ex) {
+            throw new IllegalArgumentException("Assinatura ou validade do token Google não pôde ser confirmada.", ex);
         }
 
-        if (googleToken == null) {
-            throw new IllegalArgumentException("Token do Google inválido ou expirado.");
+        String issuer = googleToken.getIssuer() != null ? googleToken.getIssuer().toString() : null;
+        if (!("https://accounts.google.com".equals(issuer) || "accounts.google.com".equals(issuer))) {
+            throw new IllegalArgumentException("Emissor do token Google inválido.");
+        }
+        if (!googleToken.getAudience().contains(googleClientId)) {
+            throw new IllegalArgumentException("Token emitido para outro aplicativo Google.");
         }
 
-        GoogleIdToken.Payload payload = googleToken.getPayload();
-        String googleId = payload.getSubject();
-        String email = payload.getEmail();
-        Boolean emailVerified = payload.getEmailVerified();
+        String googleId = googleToken.getSubject();
+        String email = googleToken.getClaimAsString("email");
+        Boolean emailVerified = googleToken.getClaimAsBoolean("email_verified");
 
         if (googleId == null || email == null || !Boolean.TRUE.equals(emailVerified)) {
             throw new IllegalArgumentException("A conta Google não possui um e-mail verificado.");
