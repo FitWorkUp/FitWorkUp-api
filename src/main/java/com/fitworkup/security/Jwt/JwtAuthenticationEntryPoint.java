@@ -20,5 +20,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("{\"status\": 401, \"error\": \"Unauthorized\", \"message\": \"Acesso não autorizado: Token JWT ausente, expirado ou inválido.\"}");
+        response.getWriter().flush();
     }
 }
