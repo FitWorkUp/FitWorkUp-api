@@ -21,13 +21,21 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        if (identifier == null || identifier.isBlank()) {
+            throw invalidCredentials();
+        }
+
         User user = userRepository.findByEmailOrUsername(identifier)
-                .orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas ou usuário não encontrado."));
+                .orElseThrow(this::invalidCredentials);
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
+    }
+
+    private UsernameNotFoundException invalidCredentials() {
+        return new UsernameNotFoundException("Credenciais inválidas.");
     }
 }

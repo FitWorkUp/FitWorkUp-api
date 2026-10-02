@@ -1,6 +1,8 @@
 package com.fitworkup.api.controllers;
     
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,9 +14,10 @@ import java.util.Map;
 @RequestMapping("/health")
 public class HealthController {
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> checkHealth() {
-        // Resposta imediata em memória (HTTP 200 OK)
-        return ResponseEntity.ok(Collections.singletonMap("status", "UP"));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(Collections.singletonMap("status", "UP"));
     }
 }

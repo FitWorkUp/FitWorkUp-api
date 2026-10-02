@@ -1,8 +1,8 @@
 package com.fitworkup.security.Jwt;
 
+import jakarta.annotation.PostConstruct;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    private static final int HS512_MINIMUM_SECRET_BYTES = 64;
+
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwt.secret}")
@@ -23,12 +25,31 @@ public class JwtTokenProvider {
     @Value("${app.jwt.expiration-ms:86400000}")
     private Long jwtExpirationInMs;
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = this.jwtSecret.getBytes(StandardCharsets.UTF_8);
-        if (keyBytes.length < 64) {
-            logger.warn("ALERTA DE SEGURANÇA: A chave 'app.jwt.secret' possui menos de 64 bytes (512 bits). Recomendado aumentar para prevenir ataques contra HS512.");
+    private SecretKey signingKey;
+
+    @PostConstruct
+    void initializeSigningKey() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured.");
         }
-        return Keys.hmacShaKeyFor(keyBytes);
+
+        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < HS512_MINIMUM_SECRET_BYTES) {
+            throw new IllegalStateException("JWT secret must contain at least 64 bytes for HS512.");
+        }
+        if (jwtExpirationInMs == null || jwtExpirationInMs <= 0) {
+            throw new IllegalStateException("JWT expiration must be greater than zero.");
+        }
+
+        signingKey = Keys.hmacShaKeyFor(keyBytes);
+        logger.info("JWT signing configuration initialized with HS512.");
+    }
+
+    private SecretKey getSigningKey() {
+        if (signingKey == null) {
+            throw new IllegalStateException("JWT signing key has not been initialized.");
+        }
+        return signingKey;
     }
 
     public String generateToken(String username) {
@@ -63,16 +84,16 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(authToken);
             return true;
-        } catch (SignatureException ex) {
-            logger.error("Assinatura do JWT inválida ou adulterada: {}", ex.getMessage());
+        } catch (io.jsonwebtoken.security.SecurityException ex) {
+            logger.warn("JWT validation rejected: reason=invalid_signature");
         } catch (MalformedJwtException ex) {
-            logger.error("Token JWT malformatado: {}", ex.getMessage());
+            logger.warn("JWT validation rejected: reason=malformed_token");
         } catch (ExpiredJwtException ex) {
-            logger.warn("Token JWT expirado: {}", ex.getMessage());
+            logger.debug("JWT validation rejected: reason=expired_token");
         } catch (UnsupportedJwtException ex) {
-            logger.error("Token JWT não suportado: {}", ex.getMessage());
+            logger.warn("JWT validation rejected: reason=unsupported_token");
         } catch (IllegalArgumentException ex) {
-            logger.error("Claims do JWT estão vazias ou nulas: {}", ex.getMessage());
+            logger.warn("JWT validation rejected: reason=empty_or_invalid_claims");
         }
         return false;
     }
