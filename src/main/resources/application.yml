@@ -35,3 +35,6 @@ app:
             scope:
               - profile
               - email
+resend:
+  api:
+    key: ${RESEND_API_KEY}

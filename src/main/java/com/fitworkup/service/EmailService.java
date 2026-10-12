@@ -1,13 +1,13 @@
 package com.fitworkup.service;
 
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
-@Service
-public class EmailService {
+import java.util.List;
+import java.util.Map;
+/*public class EmailService {
 
     private final JavaMailSender mailSender;
     private final String senderAddress;
@@ -41,6 +41,49 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception exception) {
             throw new IllegalStateException("Não foi possível enviar o e-mail de recuperação.", exception);
+        }
+    }
+}
+*/
+
+@Service
+public class EmailService {
+
+    private final RestClient restClient;
+
+    @Value("${resend.api.key}")
+    private String apiKey;
+
+    public EmailService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.baseUrl("https://api.resend.com").build();
+    }
+
+    public void sendPasswordResetCode(String toEmail, String code) {
+        try {
+            // Corpo da requisição conforme a API do Resend
+            Map<String, Object> body = Map.of(
+                "from", "onboarding@resend.dev", // E-mail padrão de testes do Resend
+                "to", List.of(toEmail),
+                "subject", "Código de Recuperação - FitWorkUp",
+                "html", "<div style='font-family: Arial, sans-serif;'>" +
+                        "<h2>Recuperação de Senha</h2>" +
+                        "<p>Você solicitou a recuperação de senha no aplicativo <strong>FitWorkUp</strong>.</p>" +
+                        "<p>Seu código de verificação é:</p>" +
+                        "<h1 style='color: #2b6cb0;'>" + code + "</h1>" +
+                        "<p>Se você não solicitou isso, ignore este e-mail.</p>" +
+                        "</div>"
+            );
+
+            restClient.post()
+                    .uri("/emails")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+
+        } catch (Exception e) {
+            throw new IllegalStateException("Não foi possível enviar o e-mail de recuperação via Resend API.", e);
         }
     }
 }
