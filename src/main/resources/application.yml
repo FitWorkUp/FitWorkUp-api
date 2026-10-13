@@ -35,6 +35,6 @@ app:
             scope:
               - profile
               - email
-resend:
+brevo:
   api:
-    key: ${RESEND_API_KEY}
+    key: ${BREVO_API_KEY}

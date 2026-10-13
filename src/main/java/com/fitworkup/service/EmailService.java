@@ -51,21 +51,27 @@ public class EmailService {
 
     private final RestClient restClient;
 
-    @Value("${resend.api.key}")
+    @Value("${brevo.api.key}")
     private String apiKey;
 
     public EmailService(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.baseUrl("https://api.resend.com").build();
+        // Endpoint oficial da API v3 do Brevo para envio de e-mails transacionais
+        this.restClient = restClientBuilder.baseUrl("https://api.brevo.com/v3").build();
     }
 
     public void sendPasswordResetCode(String toEmail, String code) {
         try {
-            // Corpo da requisição conforme a API do Resend
+            // Estrutura de dados exigida pela API do Brevo
             Map<String, Object> body = Map.of(
-                "from", "onboarding@resend.dev", // E-mail padrão de testes do Resend
-                "to", List.of(toEmail),
+                "sender", Map.of(
+                    "name", "FitWorkUp",
+                    "email", "seu-email-validado@dominio.com" // Substitua pelo e-mail validado no painel do Brevo
+                ),
+                "to", List.of(
+                    Map.of("email", toEmail)
+                ),
                 "subject", "Código de Recuperação - FitWorkUp",
-                "html", "<div style='font-family: Arial, sans-serif;'>" +
+                "htmlContent", "<div style='font-family: Arial, sans-serif;'>" +
                         "<h2>Recuperação de Senha</h2>" +
                         "<p>Você solicitou a recuperação de senha no aplicativo <strong>FitWorkUp</strong>.</p>" +
                         "<p>Seu código de verificação é:</p>" +
@@ -75,15 +81,16 @@ public class EmailService {
             );
 
             restClient.post()
-                    .uri("/emails")
-                    .header("Authorization", "Bearer " + apiKey)
+                    .uri("/smtp/email")
+                    .header("api-key", apiKey) // Cabeçalho de autenticação do Brevo
+                    .header("accept", "application/json")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
                     .retrieve()
                     .toBodilessEntity();
 
         } catch (Exception e) {
-            throw new IllegalStateException("Não foi possível enviar o e-mail de recuperação via Resend API.", e);
+            throw new IllegalStateException("Não foi possível enviar o e-mail de recuperação via Brevo API.", e);
         }
     }
 }
