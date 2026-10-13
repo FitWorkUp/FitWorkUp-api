@@ -55,34 +55,29 @@ public class EmailService {
     private String apiKey;
 
     public EmailService(RestClient.Builder restClientBuilder) {
-        // Endpoint oficial da API v3 do Brevo para envio de e-mails transacionais
         this.restClient = restClientBuilder.baseUrl("https://api.brevo.com/v3").build();
     }
 
     public void sendPasswordResetCode(String toEmail, String code) {
         try {
-            // Estrutura de dados exigida pela API do Brevo
             Map<String, Object> body = Map.of(
                 "sender", Map.of(
                     "name", "FitWorkUp",
-                    "email", "seu-email-validado@dominio.com" // Substitua pelo e-mail validado no painel do Brevo
+                    "email", "20222tadssaj0007@ifba.edu.br" // IMPORTANTE: O mesmo e-mail verificado no Brevo
                 ),
                 "to", List.of(
                     Map.of("email", toEmail)
                 ),
                 "subject", "Código de Recuperação - FitWorkUp",
-                "htmlContent", "<div style='font-family: Arial, sans-serif;'>" +
+                "htmlContent", "<html><body>" +
                         "<h2>Recuperação de Senha</h2>" +
-                        "<p>Você solicitou a recuperação de senha no aplicativo <strong>FitWorkUp</strong>.</p>" +
-                        "<p>Seu código de verificação é:</p>" +
-                        "<h1 style='color: #2b6cb0;'>" + code + "</h1>" +
-                        "<p>Se você não solicitou isso, ignore este e-mail.</p>" +
-                        "</div>"
+                        "<p>Seu código de verificação é: <strong>" + code + "</strong></p>" +
+                        "</body></html>"
             );
 
             restClient.post()
                     .uri("/smtp/email")
-                    .header("api-key", apiKey) // Cabeçalho de autenticação do Brevo
+                    .header("api-key", apiKey)
                     .header("accept", "application/json")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
