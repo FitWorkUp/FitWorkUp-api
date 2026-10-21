@@ -15,6 +15,7 @@ public class RankingItemDTO {
     private String username;
     private Integer level;
     private Long validatedSteps;
+    private Double distanceKm;
     private Long movementPoints;
     private Integer activeDays;
     private String avatarBorder;

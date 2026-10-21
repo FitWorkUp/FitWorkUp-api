@@ -71,8 +71,15 @@ public class ActivityService {
         Double distanceKm = request.getDistanceKm() != null
         ? Math.max(request.getDistanceKm(), 0.0)
         : (request.getDistanceMeters() != null ? Math.max(request.getDistanceMeters() / 1000.0, 0.0) : 0.0);
-        int acceptedSteps = request.getAcceptedSteps() != null ? Math.max(request.getAcceptedSteps(), 0) : steps;
-        int heldSteps = request.getHeldSteps() != null ? Math.max(request.getHeldSteps(), 0) : 0;
+        int heldSteps = request.getHeldSteps() != null
+                ? Math.min(Math.max(request.getHeldSteps(), 0), steps)
+                : 0;
+        int acceptedSteps = request.getAcceptedSteps() != null
+                ? Math.min(Math.max(request.getAcceptedSteps(), 0), steps - heldSteps)
+                : steps - heldSteps;
+        if (steps > 0 && acceptedSteps == 0 && heldSteps == 0) {
+            acceptedSteps = steps;
+        }
         int riskScore = request.getRiskScore() != null ? request.getRiskScore() : 0;
 
         // 2. Avaliação de fraude com suporte a dados offline e fallback físico

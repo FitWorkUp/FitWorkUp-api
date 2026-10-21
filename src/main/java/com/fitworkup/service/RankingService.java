@@ -83,6 +83,7 @@ public class RankingService {
                     .username(user.getUsername())
                     .level(user.getLevel())
                     .validatedSteps(stats.validatedSteps())
+                    .distanceKm(stats.distanceKm())
                     .movementPoints(stats.validatedSteps() / STEPS_PER_POINT)
                     .activeDays(stats.activeDays())
                     .avatarBorder(user.getAvatarBorder())
@@ -103,6 +104,7 @@ public class RankingService {
     private static final class WeeklyUserStats {
         private final User user;
         private long validatedSteps;
+        private double distanceKm;
         private final Set<LocalDate> activeDates = new HashSet<>();
 
         private WeeklyUserStats(User user) {
@@ -110,10 +112,20 @@ public class RankingService {
         }
 
         private void add(Activity activity) {
+            int totalSteps = activity.getSteps() != null ? Math.max(activity.getSteps(), 0) : 0;
+            int heldSteps = activity.getHeldSteps() != null
+                    ? Math.min(Math.max(activity.getHeldSteps(), 0), totalSteps)
+                    : 0;
             int acceptedSteps = activity.getAcceptedSteps() != null
-                    ? activity.getAcceptedSteps()
-                    : activity.getSteps() != null ? activity.getSteps() : 0;
-            validatedSteps += Math.max(acceptedSteps, 0);
+                    ? Math.min(Math.max(activity.getAcceptedSteps(), 0), totalSteps - heldSteps)
+                    : totalSteps - heldSteps;
+            if (totalSteps > 0 && acceptedSteps == 0 && heldSteps == 0) {
+                acceptedSteps = totalSteps;
+            }
+            validatedSteps += acceptedSteps;
+            if (activity.getDistanceKm() != null && Double.isFinite(activity.getDistanceKm())) {
+                distanceKm += Math.max(activity.getDistanceKm(), 0.0);
+            }
             if (activity.getTimestamp() != null) {
                 activeDates.add(activity.getTimestamp().toLocalDate());
             }
@@ -125,6 +137,10 @@ public class RankingService {
 
         private long validatedSteps() {
             return validatedSteps;
+        }
+
+        private double distanceKm() {
+            return distanceKm;
         }
 
         private int activeDays() {
