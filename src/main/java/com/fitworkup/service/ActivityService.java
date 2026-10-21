@@ -68,7 +68,9 @@ public class ActivityService {
 
         // 1. Tratamento defensivo para campos que podem vir nulos em envios offline
         int steps = request.getSteps() != null ? Math.max(request.getSteps(), 0) : 0;
-        double distanceKm = request.getDistanceKm() != null ? Math.max(request.getDistanceKm(), 0.0) : 0.0;
+        Double distanceKm = request.getDistanceKm() != null
+        ? Math.max(request.getDistanceKm(), 0.0)
+        : (request.getDistanceMeters() != null ? Math.max(request.getDistanceMeters() / 1000.0, 0.0) : 0.0);
         int acceptedSteps = request.getAcceptedSteps() != null ? Math.max(request.getAcceptedSteps(), 0) : steps;
         int heldSteps = request.getHeldSteps() != null ? Math.max(request.getHeldSteps(), 0) : 0;
         int riskScore = request.getRiskScore() != null ? request.getRiskScore() : 0;

@@ -23,36 +23,36 @@ public class FraudDetectionService {
      * @return ActivityStatus (APPROVED, UNDER_REVIEW, REJECTED)
      */
     public ActivityStatus evaluateActivity(ActivityRequest request) {
-        // 1. Validar integridade básica dos dados de entrada
-        if (request.getDistanceKm() == null || request.getSteps() == null || request.getAvgSpeed() == null) {
-            throw new FraudDetectedException("Dados de telemetria do treino incompletos.");
+        if (request.getSteps() == null) {
+            throw new FraudDetectedException("Passos não informados.");
         }
 
-        // 2. Checagens Biomecânicas e Físicas do Servidor
-        if (fraudDetector.isSpeedImpossible(request.getAvgSpeed())) {
+        Double distanceKm = request.getDistanceKm() != null
+                ? request.getDistanceKm()
+                : (request.getDistanceMeters() != null ? request.getDistanceMeters() / 1000.0 : 0.0);
+
+        Double avgSpeed = request.getAvgSpeed() != null ? request.getAvgSpeed() : 0.0;
+
+        if (distanceKm < 0 || avgSpeed < 0) {
+            throw new FraudDetectedException("Valores de distância ou velocidade inválidos.");
+        }
+
+        if (avgSpeed > 45.0) {
             throw new FraudDetectedException("Velocidade média reportada é humanamente impossível para exercícios a pé.");
         }
 
-        if (fraudDetector.isStrideLengthImpossible(request.getDistanceKm(), request.getSteps())) {
-            throw new FraudDetectedException("A relacao entre passos e distancia percorrida quebra as leis da biomecanica.");
-        }
-
-        // 3. Processamento dos Dados do StepFraudDetector (Telemetria do App)
         int riskScore = request.getRiskScore() != null ? request.getRiskScore() : 0;
         int heldSteps = request.getHeldSteps() != null ? request.getHeldSteps() : 0;
         int acceptedSteps = request.getAcceptedSteps() != null ? request.getAcceptedSteps() : 0;
 
-        // Regra de Rejeição Direta: Score de risco alto (>= 5) ou proporção absurda de passos em análise
         if (riskScore >= 5 || (acceptedSteps > 0 && heldSteps > acceptedSteps)) {
             return ActivityStatus.REJECTED;
         }
 
-        // Regra de Retenção para Análise: Score de risco moderado (>= 2) ou presença de justificativas de suspeita
         if (riskScore >= 2 || (request.getFraudReasons() != null && !request.getFraudReasons().isEmpty())) {
             return ActivityStatus.UNDER_REVIEW;
         }
 
-        // 4. Treino validado e aprovado com sucesso
         return ActivityStatus.APPROVED;
     }
 }

@@ -3,15 +3,13 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fitworkup_db}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgre}
+    url: jdbc:postgresql://localhost:5432/fitworkup_db
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
-    open-in-view: false
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
