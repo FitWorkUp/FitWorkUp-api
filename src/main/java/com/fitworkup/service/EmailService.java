@@ -1,73 +1,73 @@
 package com.fitworkup.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fitworkup.models.User;
+import com.fitworkup.repository.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClient;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private final RestClient restClient;
+    private final JavaMailSender mailSender;
+    private final UserRepository userRepository;
 
-    @Value("${brevo.api.key:}")
-    private String apiKey;
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
-    public EmailService(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.baseUrl("https://api.brevo.com/v3").build();
+    public EmailService(JavaMailSender mailSender, UserRepository userRepository) {
+        this.mailSender = mailSender;
+        this.userRepository = userRepository;
+    }
+
+    public void sendWelcomeEmail(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(user.getEmail());
+            helper.setSubject("Bem-vindo ao FitWorkUp");
+            helper.setText(
+                    "<html><body>" +
+                            "<h2>Olá, " + user.getUsername() + "!</h2>" +
+                            "<p>Seu cadastro foi concluído com sucesso.</p>" +
+                            "<p>Agora você pode começar a registrar suas atividades e acompanhar seu progresso.</p>" +
+                            "</body></html>",
+                    true
+            );
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erro ao enviar email de boas-vindas", e);
+        }
     }
 
     public void sendPasswordResetCode(String toEmail, String code) {
-        // Validação preventiva se a chave foi carregada
-        if (apiKey == null || apiKey.isBlank()) {
-            log.error("[Brevo API Error] A chave BREVO_API_KEY está vazia ou não foi carregada no Spring!");
-            throw new IllegalStateException("A chave de API do Brevo não foi configurada nas variáveis de ambiente.");
-        }
-
-        // Log seguro para conferir o formato da chave (apenas os primeiros caracteres)
-        String maskedKey = apiKey.length() > 10 ? apiKey.substring(0, 10) + "..." : "INVÁLIDA";
-        log.info("[Brevo API] Iniciando envio para: {}. Chave utilizada: {}", toEmail, maskedKey);
-
         try {
-            Map<String, Object> body = Map.of(
-                "sender", Map.of(
-                    "name", "FitWorkUp",
-                    "email", "20222tadssaj0007@ifba.edu.br" // E-mail cadastrado/validado no Brevo
-                ),
-                "to", List.of(
-                    Map.of("email", toEmail)
-                ),
-                "subject", "Código de Recuperação - FitWorkUp",
-                "htmlContent", "<html><body>" +
-                        "<h2>Recuperação de Senha</h2>" +
-                        "<p>Seu código de verificação é: <strong>" + code + "</strong></p>" +
-                        "</body></html>"
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("Código de recuperação de senha - FitWorkUp");
+            helper.setText(
+                    "<html><body>" +
+                            "<h2>Recuperação de senha</h2>" +
+                            "<p>Seu código de segurança é:</p>" +
+                            "<h3>" + code + "</h3>" +
+                            "<p>Este código expira em 15 minutos.</p>" +
+                            "</body></html>",
+                    true
             );
 
-            restClient.post()
-                    .uri("/smtp/email")
-                    .header("api-key", apiKey.trim()) // .trim() remove espaços acidentais
-                    .header("accept", "application/json")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body)
-                    .retrieve()
-                    .toBodilessEntity();
-
-            log.info("[Brevo API] E-mail enviado com sucesso para {}", toEmail);
-
-        } catch (HttpClientErrorException e) {
-            log.error("[Brevo API Error] Status: {} - Corpo da resposta: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new IllegalStateException("Falha de autenticação ou parâmetro inválido na API do Brevo: " + e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            log.error("[Brevo API Error] Erro inesperado ao enviar e-mail", e);
-            throw new IllegalStateException("Não foi possível enviar o e-mail de recuperação via Brevo API.", e);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Erro ao enviar código de recuperação de senha.", e);
         }
     }
 }
