@@ -7,7 +7,6 @@ import com.fitworkup.dto.response.UserAchievementDTO;
 import com.fitworkup.dto.request.UpdateAvatarRequest;
 import com.fitworkup.models.User;
 import com.fitworkup.repository.UserRepository;
-import com.fitworkup.repository.FriendshipRepository;
 import com.fitworkup.service.UserService;
 import com.fitworkup.service.AchievementService;
 import jakarta.validation.Valid;
@@ -30,16 +29,13 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final AchievementService achievementService;
-    private final FriendshipRepository friendshipRepository;
 
     public UserController(UserService userService,
                           UserRepository userRepository,
-                          AchievementService achievementService,
-                          FriendshipRepository friendshipRepository) {
+                          AchievementService achievementService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.achievementService = achievementService;
-        this.friendshipRepository = friendshipRepository;
     }
 
     @GetMapping("/me")
@@ -86,18 +82,10 @@ public class UserController {
 
     @GetMapping("/{userId}/public-profile")
     public ResponseEntity<PublicUserProfileDTO> getPublicProfile(
-            @PathVariable Long userId,
-            Principal principal) {
-        User currentUser = userRepository.findByEmailOrUsername(principal.getName())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+            @PathVariable Long userId) {
         User friend = userRepository.findById(userId)
                 .filter(User::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Perfil não encontrado."));
-
-        if (!currentUser.getId().equals(friend.getId())
-                && !friendshipRepository.existsAcceptedFriendship(currentUser, friend)) {
-            throw new SecurityException("O perfil completo está disponível apenas para amigos.");
-        }
 
         UserProfileDTO profile = userService.toProfile(friend);
         return ResponseEntity.ok(PublicUserProfileDTO.builder()
