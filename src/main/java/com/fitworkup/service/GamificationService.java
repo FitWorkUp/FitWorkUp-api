@@ -44,7 +44,8 @@ public class GamificationService {
                         "Usuário não encontrado para atribuição de recompensas."
                 ));
 
-        int currentXp = user.getXp() != null ? user.getXp() : 0;
+        int currentXp = user.getXp() != null ? Math.max(user.getXp(), 0) : 0;
+        int currentLevel = user.getLevel() != null ? Math.max(user.getLevel(), 1) : 1;
         int currentCoins = user.getFitcoins() != null ? user.getFitcoins() : 0;
         double xpMultiplier = applyBoosts
                 ? activeMultiplier(userId, StoreEffectType.XP_MULTIPLIER) : 1.0;
@@ -53,14 +54,18 @@ public class GamificationService {
         int finalXpGained = (int) Math.floor(xpGained * xpMultiplier);
         int finalCoinsGained = (int) Math.floor(coinsGained * fitcoinsMultiplier);
 
-        user.setXp(currentXp + finalXpGained);
         user.setFitcoins(currentCoins + finalCoinsGained);
 
-        while (user.getXp() >= gamificationCalculator.calculateXpForNewLevel(user.getLevel())) {
-            int xpRequired = gamificationCalculator.calculateXpForNewLevel(user.getLevel());
-            user.setXp(user.getXp() - xpRequired);
-            user.setLevel(user.getLevel() + 1);
+        long remainingXp = currentLevel >= GamificationCalculator.MAX_LEVEL
+                ? 0L
+                : (long) currentXp + finalXpGained;
+        while (currentLevel < GamificationCalculator.MAX_LEVEL
+                && remainingXp >= gamificationCalculator.calculateXpForNewLevel(currentLevel)) {
+            remainingXp -= gamificationCalculator.calculateXpForNewLevel(currentLevel);
+            currentLevel++;
         }
+        user.setLevel(currentLevel);
+        user.setXp(currentLevel >= GamificationCalculator.MAX_LEVEL ? 0 : (int) remainingXp);
 
         userRepository.save(user);
     }

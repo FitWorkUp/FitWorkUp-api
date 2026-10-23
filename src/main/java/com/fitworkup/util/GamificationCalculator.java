@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GamificationCalculator {
     
+    public static final int MAX_LEVEL = 100;
     private static final int BASE_XP = 100;
     private static final double EXPONENT = 1.5;
 
@@ -16,6 +17,9 @@ public class GamificationCalculator {
         // SEGURANÇA: Evita processar níveis inválidos ou zerados
         if (currentLevel < 1) {
             return BASE_XP;
+        }
+        if (currentLevel >= MAX_LEVEL) {
+            return 0;
         }
         
         // Correção da multiplicação e conversão explícita para int

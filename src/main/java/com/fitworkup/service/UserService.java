@@ -6,6 +6,7 @@ import com.fitworkup.repository.ActivityRepository;
 import com.fitworkup.repository.TokenRepository;
 import com.fitworkup.repository.UserRepository;
 import com.fitworkup.security.exceptions.UserNotFoundException;
+import com.fitworkup.util.GamificationCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +24,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
     private final TokenRepository tokenRepository;
+    private final GamificationCalculator gamificationCalculator;
 
     public UserService(UserRepository userRepository, 
                        ActivityRepository activityRepository, 
-                       TokenRepository tokenRepository) {
+                       TokenRepository tokenRepository,
+                       GamificationCalculator gamificationCalculator) {
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
         this.tokenRepository = tokenRepository;
+        this.gamificationCalculator = gamificationCalculator;
     }
 
     @Transactional(readOnly = true)
@@ -49,7 +53,7 @@ public class UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .xp(user.getXp() != null ? user.getXp() : 0)
-                .nextLevelXp(level * 1000)
+                .nextLevelXp(gamificationCalculator.calculateXpForNewLevel(level))
                 .level(level)
                 .fitcoins(user.getFitcoins() != null ? user.getFitcoins() : 0)
                 .streak(user.getStreak() != null ? user.getStreak() : 0)
